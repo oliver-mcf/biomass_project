@@ -43,37 +43,36 @@ class GeoTiff:
         '''Set resolution to match the reference GeoTIFF'''
         self.pixelWidth = ref_geotiff.pixelWidth
         self.pixelHeight = ref_geotiff.pixelHeight
-        print(f'Success setting resolution to match {ref_geotiff.pixelWidth}')
+        print(f'Success: Pixel resolution = {ref_geotiff.pixelWidth}')
 
-def read_list(pred_list):
-    '''Read a list of geotiff files'''
-    n = len(pred_list)
-    pred_vars = np.empty((n), dtype=object)
-    for i, filename in enumerate(tqdm(pred_list, desc="Reading Predictor Variables...")):
-        pred_vars[i] = GeoTiff(filename)
-        print(f'Success reading {i+1} of {n} variables.')
-    return pred_vars
-
-def intersect(gedi, landsat):
-    '''Derive intersecting predictor variables with GEDI footprints'''
-    # Allocate space for intersecting GEDI-Landsat data
+def intersect(gedi, landsat_filename):
+    '''Derive intersecting predictor variables with GEDI footprints for a single Landsat file'''
+    # read the Landsat GeoTIFF file
+    landsat = GeoTiff(landsat_filename)
+    # allocate space for intersecting GEDI-Landsat data
     nGedi = gedi.footprints.shape[0]
-    nLandsat = len(landsat)
-    landsat_intersect = np.full((nGedi, nLandsat), -999, dtype=float)
-
-    # Loop over GEDI footprints
+    landsat_intersect = np.full(nGedi, -999, dtype=float)
+    # calculate the x and y indices for each GEDI footprint
     for j in range(nGedi):
-        # Calculate the x and y indices for each GEDI footprint
         x = gedi.x[j]
         y = gedi.y[j]
-        xInd = np.floor((x - landsat[0].xOrigin) / landsat[0].pixelWidth).astype(int)
-        yInd = np.floor((y - landsat[0].yOrigin) / landsat[0].pixelHeight).astype(int)
-        if 0 <= xInd < landsat[0].nX and 0 <= yInd < landsat[0].nY:
-            # Loop over Landsat variables
-            for i in range(nLandsat):
-                landsat_intersect[j, i] = landsat[i].data[yInd, xInd]
-                
+        xInd = np.floor((x - landsat.xOrigin) / landsat.pixelWidth).astype(int)
+        yInd = np.floor((y - landsat.yOrigin) / landsat.pixelHeight).astype(int)
+        if 0 <= xInd < landsat.nX and 0 <= yInd < landsat.nY:
+            landsat_intersect[j] = landsat.data[yInd, xInd]
     return landsat_intersect
+
+def process_landsat_files(gedi, pred_vars):
+    '''Process Landsat files and combine intersected data with GEDI coordinates'''
+    all_intersects = []
+    for landsat_file in tqdm(pred_vars, desc="Processing Landsat files..."):
+        intersecting_data = intersect(gedi, landsat_file)
+        all_intersects.append(intersecting_data)
+    all_intersects = np.array(all_intersects).T
+    gedi_coordinates = np.column_stack((gedi.x, gedi.y))
+    gedi_values = gedi.footprints.reshape((-1, 1))
+    combined_data = np.hstack((gedi_coordinates, gedi_values, all_intersects))
+    return combined_data
 
 # Code #############################################################################################################
 if __name__ == '__main__':
@@ -88,28 +87,13 @@ if __name__ == '__main__':
     gedi = GeoTiff(input_var)
 
     # Read Landsat data
-    pred_vars = [
-        f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/{args.year}_NDVI_Dry95.tif',
-        f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/{args.year}_NDVI_Dry05.tif'
-    ]
-    landsat = read_list(pred_vars)
+    pred_vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/{args.year}_*.tif')
 
-    # Set the GEDI resolution to match the first Landsat file
-    gedi.set_resolution(landsat[0])
+    # Match pixel resolution
+    gedi.set_resolution(GeoTiff(pred_vars[0]))
 
-    # Isolate Landsat pixels intersecting with GEDI footprints
-    landsat_intersect = intersect(gedi, landsat)
-
-
-
-
-    print('Shape of GEDI footprint data:', gedi.footprints.shape)
-    print('Shape of intersecting Landsat data:', landsat_intersect.shape)
-    print('')
-    print('GEDI pixelWidth:', gedi.pixelWidth)
-    print('Landsat pixelWidth:', landsat[0].pixelWidth)
-    print('GEDI footprint biomass data:', gedi.footprints[:5])
-    print('Intersecting Landsat data:', landsat_intersect)
-    print('Shape of intersecting Landsat data:', landsat_intersect.shape)
-    print('Intersecting pixels with Landsat data:', landsat_intersect[landsat_intersect != -999].shape)
-    print('Number of GEDI footprints:', len(gedi.footprints.flatten()))
+    # Extract GEDI footprints and intersecting Landsat pixels
+    combined_data = process_landsat_files(gedi, pred_vars)
+    print(combined_data.shape)
+    pprint(combined_data[:1])
+   
