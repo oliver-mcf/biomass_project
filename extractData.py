@@ -67,7 +67,7 @@ def extract(gedi, pred_vars):
 
 # Code #############################################################################################################
 if __name__ == '__main__':
-    
+
     # Define command line arguments
     parser = argparse.ArgumentParser(description="Extract data for a given site over given year(s).")
     parser.add_argument("site", help="Study site by SEOSAW abbreviation.")
@@ -79,7 +79,7 @@ if __name__ == '__main__':
     gedi = GeoTiff(input_var)
 
     # Read Landsat data
-    pred_vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/{args.year}_*.tif')
+    pred_vars = sorted(glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/{args.year}_*.tif'))
 
     # Extract GEDI footprints and intersecting Landsat pixels
     extracted_data = extract(gedi, pred_vars)
