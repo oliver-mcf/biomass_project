@@ -10,6 +10,8 @@ from glob import glob
 from tqdm import tqdm
 import argparse
 from pprint import pprint
+import os
+import pandas as pd
 
 
 # Objects & Methods ################################################################################################
@@ -32,27 +34,15 @@ class GeoTiff:
         self.pixelHeight = transform_ds[5]   # resolution in y direction
         self.data = ds.GetRasterBand(1).ReadAsArray(0, 0, self.nX, self.nY)
         self.footprints = self.data[~np.isnan(self.data)]
-        
-        # Create valid x and y coordinates arrays
         valid_indices = np.where(~np.isnan(self.data))
         self.x = self.xOrigin + valid_indices[1] * self.pixelWidth
         self.y = self.yOrigin + valid_indices[0] * self.pixelHeight
-        print('Success reading:', filename)
-
-    def set_resolution(self, ref_geotiff):
-        '''Set resolution to match the reference GeoTIFF'''
-        self.pixelWidth = ref_geotiff.pixelWidth
-        self.pixelHeight = ref_geotiff.pixelHeight
-        print(f'Success: Pixel resolution = {ref_geotiff.pixelWidth}')
 
 def intersect(gedi, landsat_filename):
-    '''Derive intersecting predictor variables with GEDI footprints for a single Landsat file'''
-    # read the Landsat GeoTIFF file
+    '''Isolate intersecting Landsat pixels with GEDI footprints'''
     landsat = GeoTiff(landsat_filename)
-    # allocate space for intersecting GEDI-Landsat data
     nGedi = gedi.footprints.shape[0]
     landsat_intersect = np.full(nGedi, -999, dtype=float)
-    # calculate the x and y indices for each GEDI footprint
     for j in range(nGedi):
         x = gedi.x[j]
         y = gedi.y[j]
@@ -62,20 +52,22 @@ def intersect(gedi, landsat_filename):
             landsat_intersect[j] = landsat.data[yInd, xInd]
     return landsat_intersect
 
-def process_landsat_files(gedi, pred_vars):
-    '''Process Landsat files and combine intersected data with GEDI coordinates'''
+def extract(gedi, pred_vars):
+    '''Extract GEDI footprints and intersecting predictor variable data'''
     all_intersects = []
-    for landsat_file in tqdm(pred_vars, desc="Processing Landsat files..."):
+    for landsat_file in tqdm(pred_vars, desc = "Processing Landsat files..."):
         intersecting_data = intersect(gedi, landsat_file)
         all_intersects.append(intersecting_data)
     all_intersects = np.array(all_intersects).T
     gedi_coordinates = np.column_stack((gedi.x, gedi.y))
     gedi_values = gedi.footprints.reshape((-1, 1))
-    combined_data = np.hstack((gedi_coordinates, gedi_values, all_intersects))
-    return combined_data
+    extracted_data = np.hstack((gedi_coordinates, gedi_values, all_intersects))
+    return extracted_data
+
 
 # Code #############################################################################################################
 if __name__ == '__main__':
+    
     # Define command line arguments
     parser = argparse.ArgumentParser(description="Extract data for a given site over given year(s).")
     parser.add_argument("site", help="Study site by SEOSAW abbreviation.")
@@ -89,11 +81,14 @@ if __name__ == '__main__':
     # Read Landsat data
     pred_vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/{args.year}_*.tif')
 
-    # Match pixel resolution
-    gedi.set_resolution(GeoTiff(pred_vars[0]))
-
     # Extract GEDI footprints and intersecting Landsat pixels
-    combined_data = process_landsat_files(gedi, pred_vars)
-    print(combined_data.shape)
-    pprint(combined_data[:1])
-   
+    extracted_data = extract(gedi, pred_vars)
+    print(extracted_data.shape)
+
+    # Export labelled variables to csv
+    pred_var_names = [os.path.splitext(os.path.basename(file))[0] for file in pred_vars]
+    column_names = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB'] + pred_var_names
+    df = pd.DataFrame(extracted_data, columns=column_names)
+    print(df.head())
+    df.to_csv(f'/home/s1949330/Documents/scratch/diss_data/{args.site}_{args.year}_INPUT_DATA.csv', index = False)
+
