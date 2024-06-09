@@ -62,8 +62,17 @@ def extract(gedi, pred_vars):
     gedi_coordinates = np.column_stack((gedi.x, gedi.y))
     gedi_values = gedi.footprints.reshape((-1, 1))
     extracted_data = np.hstack((gedi_coordinates, gedi_values, all_intersects))
-    extracted_data[:, :-2][extracted_data[:, :-2] == 0] = np.nan
+    extracted_data[extracted_data == 0] = np.nan
     return extracted_data
+
+def export(array, labels, site, year):
+    var_names = [os.path.splitext(os.path.basename(label))[0] for label in labels]
+    column_names = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB'] + var_names
+    df = pd.DataFrame(array, columns = column_names)
+    pprint(df.head())
+    print(df.shape)
+    df.to_csv(f'/home/s1949330/Documents/scratch/diss_data/{site}_{year}_INPUT_DATA.csv', index = False)
+    print(f"Successful export: /scratch/diss_data/{site}_{year}_INPUT_DATA.csv\n")
 
 
 # Code #############################################################################################################
@@ -86,11 +95,6 @@ if __name__ == '__main__':
 
     # Extract GEDI footprints and intersecting Landsat pixels
     extracted_data = extract(gedi, pred_vars)
-    print(extracted_data.shape)
 
     # Export labelled variables to csv
-    pred_var_names = [os.path.splitext(os.path.basename(file))[0] for file in pred_vars]
-    column_names = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB'] + pred_var_names
-    df = pd.DataFrame(extracted_data, columns = column_names)
-    pprint(df.head())
-    df.to_csv(f'/home/s1949330/Documents/scratch/diss_data/{args.site}_{args.year}_INPUT_DATA.csv', index = False)
+    export(extracted_data, pred_vars, args.site, args.year)
