@@ -23,7 +23,7 @@ class GeoTiff:
     def read(self, filename):
         '''Read geotiff data'''
         ds = gdal.Open(filename)
-        proj = osr.SpatialReference(wkt=ds.GetProjection())
+        proj = osr.SpatialReference(wkt = ds.GetProjection())
         self.crs = proj.GetAttrValue('AUTHORITY', 1)
         self.nX = ds.RasterXSize             # number of pixels in x direction
         self.nY = ds.RasterYSize             # number of pixels in y direction
@@ -39,7 +39,7 @@ class GeoTiff:
         self.y = self.yOrigin + valid_indices[0] * self.pixelHeight
 
 def intersect(gedi, landsat_filename):
-    '''Isolate intersecting Landsat pixels with GEDI footprints'''
+    '''Isolate GEDI footprint indices in Landsat data'''
     landsat = GeoTiff(landsat_filename)
     nGedi = gedi.footprints.shape[0]
     landsat_intersect = np.full(nGedi, -999, dtype=float)
@@ -55,13 +55,14 @@ def intersect(gedi, landsat_filename):
 def extract(gedi, pred_vars):
     '''Extract GEDI footprints and intersecting predictor variable data'''
     all_intersects = []
-    for landsat_file in tqdm(pred_vars, desc = "Processing Landsat files..."):
-        intersecting_data = intersect(gedi, landsat_file)
+    for var in tqdm(pred_vars, desc = "Processing predictor variables..."):
+        intersecting_data = intersect(gedi, var)
         all_intersects.append(intersecting_data)
     all_intersects = np.array(all_intersects).T
     gedi_coordinates = np.column_stack((gedi.x, gedi.y))
     gedi_values = gedi.footprints.reshape((-1, 1))
     extracted_data = np.hstack((gedi_coordinates, gedi_values, all_intersects))
+    extracted_data[:, :-2][extracted_data[:, :-2] == 0] = np.nan
     return extracted_data
 
 
@@ -69,9 +70,9 @@ def extract(gedi, pred_vars):
 if __name__ == '__main__':
 
     # Define command line arguments
-    parser = argparse.ArgumentParser(description="Extract data for a given site over given year(s).")
-    parser.add_argument("site", help="Study site by SEOSAW abbreviation.")
-    parser.add_argument("--year", help="End of austral year, eg: for Aug 2019 to July 2020, give 20 for 2020.")
+    parser = argparse.ArgumentParser(description = "Extract data for a given site over given year(s).")
+    parser.add_argument("site", help = "Study site by SEOSAW abbreviation.")
+    parser.add_argument("--year", help = "End of austral year, eg: for Aug 2019 to July 2020, give 20 for 2020.")
     args = parser.parse_args()
 
     # Read GEDI data
@@ -79,7 +80,9 @@ if __name__ == '__main__':
     gedi = GeoTiff(input_var)
 
     # Read Landsat data
-    pred_vars = sorted(glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/{args.year}_*.tif'))
+    landsat_vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/{args.year}_*.tif')
+    srtm_vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/SRTM_*.tif')
+    pred_vars = sorted(landsat_vars + srtm_vars)
 
     # Extract GEDI footprints and intersecting Landsat pixels
     extracted_data = extract(gedi, pred_vars)
@@ -88,7 +91,6 @@ if __name__ == '__main__':
     # Export labelled variables to csv
     pred_var_names = [os.path.splitext(os.path.basename(file))[0] for file in pred_vars]
     column_names = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB'] + pred_var_names
-    df = pd.DataFrame(extracted_data, columns=column_names)
-    print(df.head())
+    df = pd.DataFrame(extracted_data, columns = column_names)
+    pprint(df.head())
     df.to_csv(f'/home/s1949330/Documents/scratch/diss_data/{args.site}_{args.year}_INPUT_DATA.csv', index = False)
-
