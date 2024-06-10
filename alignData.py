@@ -33,6 +33,7 @@ def combine(csv_list, fixed_columns, output_csv):
 # Code #############################################################################################################
 if __name__ == '__main__':
     
+    # Identify all model input data
     csv_list = glob(f'/home/s1949330/Documents/scratch/diss_data/*.csv')
     fixed_columns = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB',
                      'SR_B2_Median', 'SR_B2_StDev', 'SR_B2_p95', 'SR_B2_p05', 
@@ -45,7 +46,11 @@ if __name__ == '__main__':
                      '01_NDVI_Median', '02_NDVI_Median', '03_NDVI_Median', '04_NDVI_Median', '05_NDVI_Median', '06_NDVI_Median', '07_NDVI_Median',
                      'NDVI_Wet95', 'NDVI_Wet05', 'NDVI_Dry95', 'NDVI_Dry05', 'NDVI_Gradient',
                      'SRTM_Elevation', 'SRTM_Slope', 'SRTM_mTPI']
+    
+    # Align and export combined model input data
     output_csv = '/home/s1949330/Documents/scratch/diss_data/model/MODEL_INPUT.csv'
     combine(csv_list, fixed_columns, output_csv)
-    combined_df = pd.read_csv(output_csv)
-    pprint(combined_df.columns.tolist())
+
+    # Visual check of variable names
+    #combined_df = pd.read_csv(output_csv)
+    #pprint(combined_df.columns.tolist())
