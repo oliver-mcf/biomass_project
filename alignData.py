@@ -34,11 +34,11 @@ def combine(csv_list, fixed_columns, output_csv):
 if __name__ == '__main__':
     
     # Identify all model input data
-    csv_list = glob(f'/home/s1949330/Documents/scratch/diss_data/*.csv')
+    csv_list = glob(f'/home/s1949330/Documents/scratch/diss_data/model/*.csv')
     fixed_columns = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB',
                      'SR_B2_Median', 'SR_B2_StDev', 'SR_B2_p95', 'SR_B2_p05', 
                      'SR_B3_Median', 'SR_B3_StDev', 'SR_B3_p95', 'SR_B3_p05',
-                     'SR_B4_Median', 'SR_B4_StDev', 'SR_B4_p95', 'SR_B4_P05',
+                     'SR_B4_Median', 'SR_B4_StDev', 'SR_B4_p95', 'SR_B4_p05',
                      'SR_B5_Median', 'SR_B5_StDev', 'SR_B5_p95', 'SR_B5_p05',
                      'SR_B6_Median', 'SR_B6_StDev', 'SR_B6_p95', 'SR_B6_p05',
                      'SR_B7_Median', 'SR_B7_StDev', 'SR_B7_p95', 'SR_B7_p05',

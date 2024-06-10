@@ -62,8 +62,8 @@ def export(array, labels, site, year):
     df = pd.DataFrame(array, columns = column_names)
     pprint(df.head())
     print(df.shape)
-    df.to_csv(f'/home/s1949330/Documents/scratch/diss_data/{site}_{year}_INPUT_DATA.csv', index = False)
-    print(f"Successful export: /scratch/diss_data/{site}_{year}_INPUT_DATA.csv\n")
+    df.to_csv(f'/home/s1949330/Documents/scratch/diss_data/model/{site}_{year}_INPUT_DATA.csv', index = False)
+    print(f"Successful export: /scratch/diss_data/model/{site}_{year}_INPUT_DATA.csv\n")
  
 
 # Code #############################################################################################################

@@ -1,0 +1,197 @@
+---
+title: "Question2"
+output: html_document
+---
+
+```{r model include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(randomForest)
+
+# Load the data
+data <- read.csv("/home/s1949330/Documents/scratch/diss_data/model/MODEL_INPUT.csv")
+
+# Prepare the data
+target_column <- 4
+predictor_columns <- 5:ncol(data)
+target <- data[, target_column]
+predictors <- data[, predictor_columns]
+columns_with_only_na <- names(predictors)[colSums(is.na(predictors)) == nrow(predictors)]
+predictors <- predictors[, colSums(is.na(predictors)) != nrow(predictors)]
+
+# State excluded variables
+if (length(columns_with_only_na) > 0) {
+  cat("Columns removed for only containing NAs:\n")
+  print(columns_with_only_na)}
+
+# Combine target and predictors into one data frame
+model_data <- data.frame(target, predictors)
+
+# Ensure the combined data frame does not contain any NA rows
+model_data <- model_data[complete.cases(model_data), ]
+
+# Update target and predictors after removing NA rows
+target <- model_data[, 1]
+predictors <- model_data[, -1]
+
+# Train the random forest model
+rf_model <- randomForest(target ~ ., data = model_data, importance = TRUE, na.action = na.pass)
+
+# Predict the target variable using the random forest model
+predictions <- predict(rf_model, model_data)
+
+# Calculate performance statistics
+R2_ <- 1 - sum((target - predictions)^2) / sum((target - mean(target))^2)
+RMSE_ <- sqrt(mean((target - predictions)^2))
+MAE_ <- mean(abs(target - predictions))
+mean_target <- mean(target)
+RMSE_percent_ <- (RMSE / mean_target) * 100
+MAE_percent_ <- (MAE / mean_target) * 100
+
+# Print the results
+cat("R²:", R2_, "\n")
+cat("RMSE (Mg/ha):", RMSE_, "\n")
+cat("RMSE (%):", RMSE_percent_, "\n")
+cat("MAE (Mg/ha):", MAE_, "\n")
+cat("MAE (%):", MAE_percent_, "\n")
+
+# Save the model
+save(rf_model, file = "/home/s1949330/Documents/scratch/diss_data/model/RF_MODEL_LANDSAT.RData")
+
+# To load the model later
+# load("random_forest_model.RData")
+
+```
+
+```{r model_sensitivity include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Sort the data by target variable
+model_data <- model_data[order(model_data$target), ]
+
+# Define the number of segments
+num_segments <- 10
+
+# Calculate the number of data points per segment
+points_per_segment <- ceiling(nrow(model_data) / num_segments)
+print("Points per segment:\n")
+print(points_per_segment)
+
+# Define a function to calculate performance metrics
+calculate_performance <- function(data, model) {
+  target <- data[, 1]
+  predictors <- data[, -1]
+  predictions <- predict(model, data)
+  R2 <- 1 - sum((target - predictions)^2) / sum((target - mean(target))^2)
+  RMSE <- sqrt(mean((target - predictions)^2))
+  MAE <- mean(abs(target - predictions))
+  mean_target <- mean(target)
+  RMSE_percent <- (RMSE / mean_target) * 100
+  MAE_percent <- (MAE / mean_target) * 100
+  return(list(R2 = R2, RMSE = RMSE, MAE = MAE, RMSE_percent = RMSE_percent, MAE_percent = MAE_percent))
+}
+
+# Initialize lists to store performance metrics for each segment
+R2_list <- list()
+RMSE_list <- list()
+MAE_list <- list()
+RMSE_percent_list <- list()
+MAE_percent_list <- list()
+max_target_list <- list()  # List to store maximum target value of each segment
+
+# Loop through each segment and evaluate performance
+for (i in 1:num_segments) {
+  start_index <- (i - 1) * points_per_segment + 1
+  end_index <- min(i * points_per_segment, nrow(model_data))
+  segment_data <- model_data[start_index:end_index, ]
+  performance <- calculate_performance(segment_data, rf_model)
+  R2_list[[i]] <- performance$R2
+  RMSE_list[[i]] <- performance$RMSE
+  MAE_list[[i]] <- performance$MAE
+  RMSE_percent_list[[i]] <- performance$RMSE_percent
+  MAE_percent_list[[i]] <- performance$MAE_percent
+  max_target <- max(segment_data$target)
+  max_target_list[[i]] <- max_target
+}
+
+# Print overall results
+segment_results <- data.frame(Segment = 1:num_segments,
+                              R2 = unlist(R2_list),
+                              RMSE = unlist(RMSE_list),
+                              MAE = unlist(MAE_list),
+                              RMSE_percent = unlist(RMSE_percent_list),
+                              MAE_percent = unlist(MAE_percent_list),
+                              Max_Target_Value = unlist(max_target_list))
+print(segment_results)
+
+# Plot the results
+ggplot(segment_results, aes(x = Max_Target_Value)) +
+  geom_line(aes(y = RMSE_percent, color = "RMSE%"), size = 1) +
+  geom_line(aes(y = MAE_percent, color = "MAE%"), size = 1) +
+  geom_hline(yintercept = RMSE_percent_, linetype = "dashed", color = "blue") +
+  geom_hline(yintercept = MAE_percent_, linetype = "dashed", color = "red") +
+  labs(x = "Predicted Landsat AGB", y = "Percentage of Mean", title = "Model Sensitivity to AGB Magnitude") +
+  scale_color_manual(name = "Performance Statistic", values = c("RMSE%" = "blue", "MAE%" = "red")) +
+  theme_classic() + 
+  theme(panel.grid.major = element_line(color = "grey95"),
+        panel.grid.minor = element_line(color = "grey95"))
+
+```
+
+
+
+```{r model_importance include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Print variable importance
+cat("Variable Importance:\n")
+importance_values <- importance(rf_model)
+importance_values <- importance_values[order(-importance_values[, 1]), ]
+print(importance_values[1:10, , drop = FALSE])
+
+# Plot variable importance
+png(filename = "/home/s1949330/Documents/scratch/diss_data/model/PLOT.png", width = 1000, height = 800)
+varImpPlot(rf_model, main = "Variable Importance", n.var = nrow(importance_values))
+dev.off()
+
+```
+
+
+```{r model_test include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(viridis)
+library(grid)
+library(gridExtra)
+
+# Create a heatmap
+plot_data <- data.frame(Predicted_AGB = predictions, Observed_AGB = target)
+heatmap_plot <- ggplot(plot_data, aes(x = Observed_AGB, y = Predicted_AGB)) +
+  geom_bin2d(binwidth = c(4.5, 4.5)) +
+  scale_fill_viridis_c(name = "Count") +
+  geom_abline(intercept = 0, slope = 1, linetype = "solid", color = "black", size = 0.5) +
+  geom_smooth(method = "lm", se = FALSE, color = "red", linetype = "dashed", size = 0.5) +
+  labs(x = "Observed AGB", y = "Predicted AGB", title = "[Heatmap] Predicted Landsat AGB vs. Observed GEDI AGB") +
+  xlim(0, 300) +
+  ylim(0, 300) +
+  theme_classic() +
+  theme(panel.grid.major = element_line(color = "grey95"),
+        panel.grid.minor = element_line(color = "grey95"))
+print(heatmap_plot)
+
+# Create the scatter plot
+scatter_plot <- ggplot(plot_data, aes(x = Observed_AGB, y = Predicted_AGB)) +
+  geom_point(color = "steelblue", size = 1) +
+  geom_abline(intercept = 0, slope = 1, linetype = "solid", color = "black", size = 0.5) +
+  geom_smooth(method = "lm", se = FALSE, color = "red", linetype = "dashed", size = 0.5) +
+  labs(x = "Observed AGB", y = "Predicted AGB", title = "[Scatter] Predicted Landsat AGB vs. Observed GEDI AGB") +
+  xlim(0, 300) +
+  ylim(0, 300) +
+  theme_classic() +
+  theme(panel.grid.major = element_line(color = "grey95"),
+        panel.grid.minor = element_line(color = "grey95"))
+print(scatter_plot)
+
+```
+
+
+
