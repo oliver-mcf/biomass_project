@@ -64,7 +64,7 @@ def export(array, labels, site, year):
     print(df.shape)
     df.to_csv(f'/home/s1949330/Documents/scratch/diss_data/{site}_{year}_INPUT_DATA.csv', index = False)
     print(f"Successful export: /scratch/diss_data/{site}_{year}_INPUT_DATA.csv\n")
-
+ 
 
 # Code #############################################################################################################
 if __name__ == '__main__':
