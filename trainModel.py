@@ -30,12 +30,12 @@ def train(predictors_train, input_train):
     print('Running Random Forest Algorithm ...')
     rf = RandomForestRegressor(n_estimators = 200, random_state = random.seed())
     rf.fit(predictors_train, input_train)
-    joblib.dump(rf, '/home/s1949330/Documents/scratch/diss_data/model/RF_MODEL_2.joblib')
+    joblib.dump(rf, '/home/s1949330/Documents/scratch/diss_data/model/RF_MODEL.joblib')
     print('Successful Model Training')
     return
 
 def test(predictors_test, input_test):
-    rf = joblib.load('/home/s1949330/Documents/scratch/diss_data/model/RF_MODEL_2.joblib')
+    rf = joblib.load('/home/s1949330/Documents/scratch/diss_data/model/RF_MODEL.joblib')
     output = rf.predict(predictors_test)
     print('Successful Model Testing')
     r2 = stats.pearsonr(input_test, output)
@@ -57,7 +57,7 @@ def white(output, input_test):
     print(f'p-value: {white_test[1]:.2f}')
 
 def variable_importance(var_names):
-    rf = joblib.load('/home/s1949330/Documents/scratch/diss_data/model/RF_MODEL_2.joblib')
+    rf = joblib.load('/home/s1949330/Documents/scratch/diss_data/model/RF_MODEL.joblib')
     importances = rf.feature_importances_
     sorted_idx = np.argsort(importances)[::-1]
     sorted_importances = importances[sorted_idx]
@@ -65,6 +65,23 @@ def variable_importance(var_names):
     for i, importance in enumerate(sorted_importances):
         scaled_importance = importance * 100
         print("{}: {} - {:.2f}%".format(i + 1, var_names[sorted_idx[i]], scaled_importance))    
+
+def plot_test(input_test, output):
+    plt.rcParams['font.family'] = 'Arial'
+    plt.figure(figsize = (8, 6))
+    plt.plot([0, 2000], [0, 2000], ls = '-', color = 'k')
+    plt.hist2d(input_test, output, bins = (50, 50), cmap = 'cividis', cmin = 1)
+    plt.xlim([0, 2000])
+    plt.ylim([0, 2000])
+    plt.xticks(np.arange(0, 2050, 50))
+    plt.yticks(np.arange(0, 2050, 50))
+    cbar = plt.colorbar(shrink = 0.75)
+    plt.title('Model Test')
+    plt.xlabel('Observed AGB (Mg/ha)')
+    plt.ylabel('Predicted AGB (Mg/ha)')
+    plt.savefig('/home/s1949330/Documents/scratch/diss_data/model/MODEL_TEST.png')
+    plt.show()
+
 
 def convert_bytes(number):
     '''Function to convert file size to known units'''
@@ -112,19 +129,7 @@ if __name__ == '__main__':
     variable_importance(var_names)
 
     # Visualise RF model test
-    plt.rcParams['font.family'] = 'Arial'
-    max_value = max(max(input_test), max(output))
-    plt.figure(figsize = (8, 6))
-    plt.plot([0, max_value], [0, max_value], ls = '-', color = 'k')
-    plt.xlim([0, max_value])
-    plt.ylim([0, max_value])
-    plt.hist2d(input_test, output, bins = (40, 40), cmap = 'cividis', cmin = 1)
-    cbar = plt.colorbar(shrink = 0.75)
-    plt.title('Model Test')
-    plt.xlabel('Observed AGB (Mg/ha)')
-    plt.ylabel('Predicted AGB (Mg/ha)')
-    plt.savefig('/home/s1949330/Documents/scratch/diss_data/model/MODEL_TEST.png')
-    plt.show()
+    plot_test(input_test, output)
 
     # Calculate CPU runtime and RAM usage
     print(f"CPU runtime: {round(((time.process_time() - start) / 60), 2)} minutes")
