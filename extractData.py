@@ -32,7 +32,7 @@ class GeoTiff:
 def intersect(gedi, landsat_filename):
     '''Isolate GEDI footprint indices in Landsat data'''
     landsat = GeoTiff(landsat_filename)
-    nGedi = gedi.footprints.shape[0]
+    nGedi = len(gedi.footprints)
     landsat_intersect = np.full(nGedi, -999, dtype=float)
     for j in range(nGedi):
         x = gedi.x[j]
@@ -88,4 +88,4 @@ if __name__ == '__main__':
     extracted_data = extract(gedi, pred_vars)
 
     # Export labelled variables to csv
-    export(extracted_data, pred_vars, args.site, args.year)
+    #export(extracted_data, pred_vars, args.site, args.year)
