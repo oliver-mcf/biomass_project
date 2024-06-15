@@ -82,10 +82,11 @@ if __name__ == '__main__':
     # Read Landsat data
     landsat_vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/{args.year}_*.tif')
     srtm_vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/SRTM_*.tif')
-    pred_vars = sorted(landsat_vars + srtm_vars)
+    sent_vars = glob(f'/home/s1949330/Documents/sratch/diss_data/pred_vars/{args.site}/{args.year}_*.tif')
+    pred_vars = sorted(landsat_vars + srtm_vars + sent_vars)
 
     # Extract GEDI footprints and intersecting Landsat pixels
     extracted_data = extract(gedi, pred_vars)
 
     # Export labelled variables to csv
-    #export(extracted_data, pred_vars, args.site, args.year)
+    export(extracted_data, pred_vars, args.site, args.year)

@@ -68,7 +68,7 @@ def variable_importance(var_names):
 
 def plot_test(input_test, output):
     plt.rcParams['font.family'] = 'Arial'
-    plt.figure(figsize = (8, 6))
+    plt.figure(figsize = (12, 10))
     plt.plot([0, 2000], [0, 2000], ls = '-', color = 'k')
     plt.hist2d(input_test, output, bins = (50, 50), cmap = 'cividis', cmin = 1)
     plt.xlim([0, 2000])
@@ -81,7 +81,6 @@ def plot_test(input_test, output):
     plt.ylabel('Predicted AGB (Mg/ha)')
     plt.savefig('/home/s1949330/Documents/scratch/diss_data/model/MODEL_TEST.png')
     plt.show()
-
 
 def convert_bytes(number):
     '''Function to convert file size to known units'''
@@ -114,8 +113,8 @@ if __name__ == '__main__':
     # Save model training data to visualise
     training_data = pd.concat([coords, pd.DataFrame({'input_train': input_train})], axis = 1).dropna(subset = ['input_train'])
     testing_data = pd.concat([coords, pd.DataFrame({'input_test': input_test})], axis = 1).dropna(subset = ['input_test'])
-    training_data.to_csv('/home/s1949330/Documents/scratch/diss_data/model/LANDSAT_MODEL_TRAINING.csv', index = False)
-    testing_data.to_csv('/home/s1949330/Documents/scratch/diss_data/model/LANDSAT_MODEL_TESTING.csv', index = False)
+    training_data.to_csv('/home/s1949330/Documents/scratch/diss_data/model/MODEL_TRAINING.csv', index = False)
+    testing_data.to_csv('/home/s1949330/Documents/scratch/diss_data/model/MODEL_TESTING.csv', index = False)
 
     # Train RF model
     train(predictors_train, input_train)
