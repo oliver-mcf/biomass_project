@@ -46,8 +46,8 @@ if __name__ == '__main__':
                      '02_NDVI_Median', '03_NDVI_Median', '04_NDVI_Median', '05_NDVI_Median', '06_NDVI_Median', '07_NDVI_Median',
                      'NDVI_Wet95', 'NDVI_Wet05', 'NDVI_Dry95', 'NDVI_Dry05', 'NDVI_Gradient',
                      'SRTM_Elevation', 'SRTM_Slope', 'SRTM_mTPI',
-                     'VV_Median', 'VV_StDev', 'VV_p95', 'VV_p05',
-                     'VH_Median', 'VH_StDev', 'VH_p95', 'VH_p05']
+                     'VV_Median', 'VV_StDev', 'VV_95', 'VV_05',
+                     'VH_Median', 'VH_StDev', 'VH_95', 'VH_05']
     
     # Align and export combined model input data
     output_csv = '/home/s1949330/Documents/scratch/diss_data/model/MODEL_INPUT.csv'

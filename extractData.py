@@ -33,7 +33,7 @@ def intersect(gedi, landsat_filename):
     '''Isolate GEDI footprint indices in Landsat data'''
     landsat = GeoTiff(landsat_filename)
     nGedi = len(gedi.footprints)
-    landsat_intersect = np.full(nGedi, -999, dtype=float)
+    landsat_intersect = np.full(nGedi, -999, dtype = float)
     for j in range(nGedi):
         x = gedi.x[j]
         y = gedi.y[j]
@@ -80,10 +80,9 @@ if __name__ == '__main__':
     gedi = GeoTiff(input_var)
 
     # Read Landsat data
-    landsat_vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/{args.year}_*.tif')
+    vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/{args.year}_*.tif')
     srtm_vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/SRTM_*.tif')
-    sent_vars = glob(f'/home/s1949330/Documents/sratch/diss_data/pred_vars/{args.site}/{args.year}_*.tif')
-    pred_vars = sorted(landsat_vars + srtm_vars + sent_vars)
+    pred_vars = sorted(vars + srtm_vars)
 
     # Extract GEDI footprints and intersecting Landsat pixels
     extracted_data = extract(gedi, pred_vars)

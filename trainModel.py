@@ -9,8 +9,8 @@ from libraries import *
 def isolate(filename):
     df = pd.read_csv(filename)
     df = df.drop(columns = ['Source'])
-    df = df.drop(columns = ['01_NDVI_Median', '02_NDVI_Median', '03_NDVI_Median', '04_NDVI_Median'])
-    #df = df.loc[:, ~ df.columns.str.contains('_NDVI_Median')]
+    #df = df.drop(columns = ['01_NDVI_Median', '02_NDVI_Median', '03_NDVI_Median', '04_NDVI_Median'])
+    df = df.loc[:, ~ df.columns.str.contains('_NDVI_Median')]
     #na_counts = df.isnull().sum()
     #max_na_column = na_counts.idxmax()
     #max_na_count = na_counts.max()
@@ -18,7 +18,10 @@ def isolate(filename):
     df = df.dropna()
     input = df['GEDI_AGB']
     coords = df[['GEDI_X', 'GEDI_Y']]
-    predictors = df.drop(columns = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB'])
+    predictors = df.loc[:,'SR_B2_Median':'VH_05']
+    # Landsat = SR_B2_Median : SRTM_mTPI
+    # Sentinel = SR_B2_Median : VH_05
+    # Palsar = SR_B2_Median : 
     print('Available Points for Model Training: {:,}'.format(len(predictors)))
     return input, predictors, coords
 
@@ -69,12 +72,12 @@ def variable_importance(var_names):
 def plot_test(input_test, output):
     plt.rcParams['font.family'] = 'Arial'
     plt.figure(figsize = (12, 10))
-    plt.plot([0, 2000], [0, 2000], ls = '-', color = 'k')
-    plt.hist2d(input_test, output, bins = (50, 50), cmap = 'cividis', cmin = 1)
-    plt.xlim([0, 2000])
-    plt.ylim([0, 2000])
-    plt.xticks(np.arange(0, 2050, 50))
-    plt.yticks(np.arange(0, 2050, 50))
+    plt.plot([0, 600], [0, 600], ls = '-', color = 'k')
+    plt.hist2d(input_test, output, bins = (75, 75), cmap = 'turbo', cmin = 1)
+    plt.xlim([0, 600])
+    plt.ylim([0, 600])
+    plt.xticks(np.arange(0, 650, 50))
+    plt.yticks(np.arange(0, 650, 50))
     cbar = plt.colorbar(shrink = 0.75)
     plt.title('Model Test')
     plt.xlabel('Observed AGB (Mg/ha)')
