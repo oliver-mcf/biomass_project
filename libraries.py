@@ -24,3 +24,6 @@ import time
 import psutil
 import matplotlib.pyplot as plt
 import csv
+import rasterio as rio
+from rasterio.enums import Resampling
+from rasterio.warp import calculate_default_transform, reproject

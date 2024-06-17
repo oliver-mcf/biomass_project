@@ -10,7 +10,7 @@ def isolate(filename):
     df = pd.read_csv(filename)
     df = df.drop(columns = ['Source'])
     #df = df.drop(columns = ['01_NDVI_Median', '02_NDVI_Median', '03_NDVI_Median', '04_NDVI_Median'])       # FilteredMonths
-    #df = df.loc[:, ~ df.columns.str.contains('_NDVI_Median')]                                              # RemovedMonths
+    df = df.loc[:, ~ df.columns.str.contains('_NDVI_Median')]                                              # RemovedMonths
     df = df.dropna()
     input = df['GEDI_AGB']
     coords = df[['GEDI_X', 'GEDI_Y']]
