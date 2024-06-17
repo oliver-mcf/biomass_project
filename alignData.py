@@ -33,14 +33,14 @@ def combine(csv_list, fixed_columns, output_csv):
 def decibels(dn):
     return 10 * np.log10(dn ** 2) - 83.0
 
-def convert_palsar(file_path, output_path):
-    df = pd.read_csv(file_path)
+def convert_palsar(file):
+    df = pd.read_csv(file)
     columns_to_correct = ['HH_Median', 'HH_StDev', 'HH_95', 'HH_05', 
                           'HV_Median', 'HV_StDev', 'HV_95', 'HV_05']
     for col in columns_to_correct:
         if col in df.columns:
             df[col] = df[col].apply(decibels)
-    df.to_csv(output_path, index = False)
+    df.to_csv(file, index = False)
     print(f'Successful conversion of PALSAR data from DN to dB')
 
 
@@ -70,9 +70,5 @@ if __name__ == '__main__':
     combine(csv_list, fixed_columns, output_csv)
 
     # Convert Palsar data to decibels
-    convert_palsar(output_csv, output_csv)
+    convert_palsar(output_csv)
 
-
-    # Visual check of variable names
-    #combined_df = pd.read_csv(output_csv)
-    #pprint(combined_df.columns.tolist())
