@@ -24,6 +24,7 @@ def combine(csv_list, fixed_columns, output_csv):
                 df[fixed_col] = df[column_mapping[fixed_col]]
         df = df[['Source'] + fixed_columns]
         combined_df = pd.concat([combined_df, df], ignore_index = True)
+    combined_df = combined_df.sort_values(by = 'Source')
     combined_df.to_csv(output_csv, index = False)
     print(combined_df.head())
     print(combined_df.shape)
@@ -34,7 +35,7 @@ def combine(csv_list, fixed_columns, output_csv):
 if __name__ == '__main__':
     
     # Identify all model input data
-    csv_list = glob(f'/home/s1949330/Documents/scratch/diss_data/model/*.csv')
+    csv_list = glob(f'/home/s1949330/Documents/scratch/diss_data/model/csv/*.csv')
     fixed_columns = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB',
                      'SR_B2_Median', 'SR_B2_StDev', 'SR_B2_p95', 'SR_B2_p05', 
                      'SR_B3_Median', 'SR_B3_StDev', 'SR_B3_p95', 'SR_B3_p05',
@@ -47,7 +48,9 @@ if __name__ == '__main__':
                      'NDVI_Wet95', 'NDVI_Wet05', 'NDVI_Dry95', 'NDVI_Dry05', 'NDVI_Gradient',
                      'SRTM_Elevation', 'SRTM_Slope', 'SRTM_mTPI',
                      'VV_Median', 'VV_StDev', 'VV_95', 'VV_05',
-                     'VH_Median', 'VH_StDev', 'VH_95', 'VH_05']
+                     'VH_Median', 'VH_StDev', 'VH_95', 'VH_05',
+                     'HH_Median', 'HH_StDev', 'HH_95', 'HH_05',
+                     'HV_Median', 'HV_StDev', 'HV_95', 'HV_05']
     
     # Align and export combined model input data
     output_csv = '/home/s1949330/Documents/scratch/diss_data/model/MODEL_INPUT.csv'

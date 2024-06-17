@@ -6,13 +6,14 @@ output: html_document
 ```{r model include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(randomForest)
+library(Metrics)
 
 # Load the data
 data <- read.csv("/home/s1949330/Documents/scratch/diss_data/model/MODEL_INPUT.csv")
 
 # Prepare the data
 target_column <- 4
-predictor_columns <- 5:ncol(data)
+predictor_columns <- 5:44 #ncol(data)
 target <- data[, target_column]
 predictors <- data[, predictor_columns]
 columns_with_only_na <- names(predictors)[colSums(is.na(predictors)) == nrow(predictors)]
@@ -36,26 +37,22 @@ predictors <- model_data[, -1]
 # Train the random forest model
 rf_model <- randomForest(target ~ ., data = model_data, importance = TRUE, na.action = na.pass)
 
-# Predict the target variable using the random forest model
+# Predict target with the random forest model
 predictions <- predict(rf_model, model_data)
 
-# Calculate performance statistics
-R2_ <- 1 - sum((target - predictions)^2) / sum((target - mean(target))^2)
-RMSE_ <- sqrt(mean((target - predictions)^2))
-MAE_ <- mean(abs(target - predictions))
-mean_target <- mean(target)
-RMSE_percent_ <- (RMSE / mean_target) * 100
-MAE_percent_ <- (MAE / mean_target) * 100
+# Calculate statistics
+r_squared <- cor(target, predictions)^2
+rmse_value <- rmse(target, predictions)
+mae_value <- mae(target, predictions)
 
-# Print the results
-cat("R²:", R2_, "\n")
-cat("RMSE (Mg/ha):", RMSE_, "\n")
-cat("RMSE (%):", RMSE_percent_, "\n")
-cat("MAE (Mg/ha):", MAE_, "\n")
-cat("MAE (%):", MAE_percent_, "\n")
+# Print performance metrics
+cat("Performance Metrics:\n")
+cat("R-squared: ", r_squared, "\n")
+cat("RMSE: ", rmse_value, "\n")
+cat("MAE: ", mae_value, "\n")
 
-# Save the model
-save(rf_model, file = "/home/s1949330/Documents/scratch/diss_data/model/RF_MODEL_LANDSAT.RData")
+# Save model
+#save(rf_model, file = "/home/s1949330/Documents/scratch/diss_data/model/RF_MODEL_SENTINEL.RData")
 
 # To load the model later
 # load("random_forest_model.RData")
@@ -81,9 +78,9 @@ calculate_performance <- function(data, model) {
   target <- data[, 1]
   predictors <- data[, -1]
   predictions <- predict(model, data)
-  R2 <- 1 - sum((target - predictions)^2) / sum((target - mean(target))^2)
-  RMSE <- sqrt(mean((target - predictions)^2))
-  MAE <- mean(abs(target - predictions))
+  R2 <- cor(target, predictions)^2
+  RMSE <- rmse(target, predictions)
+  MAE <- mae(target, predictions)
   mean_target <- mean(target)
   RMSE_percent <- (RMSE / mean_target) * 100
   MAE_percent <- (MAE / mean_target) * 100
@@ -127,10 +124,12 @@ print(segment_results)
 ggplot(segment_results, aes(x = Max_Target_Value)) +
   geom_line(aes(y = RMSE_percent, color = "RMSE%"), size = 1) +
   geom_line(aes(y = MAE_percent, color = "MAE%"), size = 1) +
-  geom_hline(yintercept = RMSE_percent_, linetype = "dashed", color = "blue") +
-  geom_hline(yintercept = MAE_percent_, linetype = "dashed", color = "red") +
-  labs(x = "Predicted Landsat AGB", y = "Percentage of Mean", title = "Model Sensitivity to AGB Magnitude") +
-  scale_color_manual(name = "Performance Statistic", values = c("RMSE%" = "blue", "MAE%" = "red")) +
+  geom_line(aes(y = R2 * 100, color = "R2"), size = 1) +
+  geom_hline(yintercept = RMSE_percent, linetype = "dashed", color = "blue") +
+  geom_hline(yintercept = MAE_percent, linetype = "dashed", color = "red") +
+  geom_hline(yintercept = R2 * 100, linetype = "dashed", color = "forestgreen") +
+  labs(x = "Predicted AGB", y = "Percentage", title = "Model Sensitivity to AGB Magnitude") +
+  scale_color_manual(name = "Performance Metric", values = c("R2" = "forestgreen", "RMSE%" = "blue", "MAE%" = "red")) +
   theme_classic() + 
   theme(panel.grid.major = element_line(color = "grey95"),
         panel.grid.minor = element_line(color = "grey95"))
