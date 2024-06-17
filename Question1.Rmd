@@ -126,69 +126,115 @@ categorize_year <- function(date) {
 df_AGB$Year_Category <- sapply(df_AGB$Date, categorize_year)
 df_AGB <- df_AGB[!is.na(df_AGB$Year_Category), ]
 df_AGB$Month <- month(df_AGB$Date, label = TRUE, abbr = TRUE)
+df_AGB$Month <- factor(df_AGB$Month, levels = c("Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"))
 
 # Plot annual series of biomass
 plot_AGB <- lapply(unique(df_AGB$Site), function(site) {
   df_site <- subset(df_AGB, Site == site)
   ggplot(df_site, aes(x = Month, y = AGB_Mean, color = Year_Category, group = Year_Category)) +
     geom_point(size = 2) +
-    geom_line(aes(group = Year_Category, color = Year_Category), size = 1) +
+    geom_line(aes(group = Year_Category, color = Year_Category), size = 0.5) +
+    geom_errorbar(aes(ymin = AGB_Mean - AGB_StErr, ymax = AGB_Mean + AGB_StErr), width = 0) +
     labs(title = paste("GEDI Aboveground Biomass, 2019-2022:", site), x = "Month", y = "AGB (Mg/ha)", color = "Legend") +
-    scale_color_manual(values = c("2019-20" = "darkred", "2020-21" = "steelblue", "2021-22" = "orange")) +
+    scale_color_manual(values = c("2019-20" = "darkred", "2020-21" = "steelblue", "2021-22" = "forestgreen")) +
     theme_classic() +
     theme(panel.grid.major = element_line(color = "grey95"),
           panel.grid.minor = element_line(color = "grey95"),
-          panel.grid.minor.y = element_line(color = "gray95"))})
+          panel.grid.minor.y = element_line(color = "gray95"))
+})
 plot_AGB
+
 ```
 
 ```{r biomass_ACF include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 # Read data
-site_data <- read.csv("/home/s1949330/Documents/scratch/diss_data/gedi/acf_analysis/data_TKW.csv")
+site_data <- read.csv("/home/s1949330/Documents/scratch/diss_data/gedi/gedi_data.csv")
 site_data$Date <- as.Date(site_data$Date, format = "%d/%m/%Y")
-biomass_ts <- ts(site_data$AGB_Mean)
 
-# Plot ACF for biomass series
-acf_values <- acf(biomass_ts, na.action = na.pass, lag.max = length(biomass_ts) + 1, plot = FALSE)
-acf_values_plot <- acf_values$acf[-1]
-summary(acf_values_plot)
-plot(acf_values_plot, type = "h", main = "Autocorrelation of GEDI Biomass Data: TKW", xlab = "Lag (Months)", ylab = "Autocorrelation", xaxt = "n", ylim = c(min(acf_values_plot), max(acf_values_plot)))
-axis(1, at = 1:length(biomass_ts), labels = 1:length(biomass_ts))
-lines(1:length(acf_values_plot), acf_values_plot, col = "black")
-abline(h = c(-1.96/sqrt(length(biomass_ts)), 1.96/sqrt(length(biomass_ts))), col = "blue", lty = 2)
-abline(v = c(12, 24, 36), col = 'gray', lty = 2)
-abline(h = c(0), col = 'black')
+# Function to create ACF data frame
+create_acf_df <- function(df_site) {
+  biomass_ts <- ts(df_site$AGB_Mean, start = c(year(min(df_site$Date)), month(min(df_site$Date))), frequency = 12)
+  acf_values <- acf(biomass_ts, na.action = na.pass, lag.max = length(biomass_ts) + 1, plot = FALSE)
+  acf_df <- data.frame(Lag = 1:length(acf_values$acf[-1]), ACF = acf_values$acf[-1])
+  return(acf_df)
+}
+
+# Calculate the significance threshold
+significance_threshold <- function(n) {
+  return(1.96 / sqrt(n))
+}
+
+# Create ACF plots
+plot_acf_list <- lapply(unique(site_data$Site), function(site) {
+  df_site <- subset(site_data, Site == site)
+  acf_df <- create_acf_df(df_site)
+  n <- nrow(df_site)
+  threshold <- significance_threshold(n)
+  
+  ggplot(acf_df, aes(x = Lag, y = ACF)) +
+    geom_hline(yintercept = 0, color = "black", linetype = "solid", size = 0.5) +
+    geom_hline(yintercept = c(-threshold, threshold), col = "darkred", linetype = "dashed") +
+    geom_bar(stat = "identity", width = 0.25, fill = "steelblue", alpha = 0.5) +
+    geom_line(color = "black", size = 0.5) +
+    geom_point(color = "black", size = 1) +
+    labs(title = paste("Autocorrelation of GEDI Biomass Data:", site), x = "Lag (Months)", y = "Autocorrelation") +
+    theme_classic() +
+    theme(panel.grid.major = element_line(color = "grey95"),
+          panel.grid.minor = element_line(color = "grey95"),
+          panel.grid.minor.y = element_line(color = "gray95"))
+})
+
+# Display the plots
+plot_acf_list
 
 ```
 
 ```{r biomass_AR include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-# Read data
-site_data <- read.csv("/home/s1949330/Documents/scratch/diss_data/gedi/acf_analysis/data_TKW.csv")
-x <- as.Date(site_data$Date, format = "%d/%m/%Y")
-x_numeric <- seq_along(x)
-biomass_ts <- ts(site_data$AGB_Mean)
+#Read data
+site_data <- read.csv("/home/s1949330/Documents/scratch/diss_data/gedi/gedi_data.csv")
+site_data$Date <- as.Date(site_data$Date, format = "%d/%m/%Y")
 
-# Derive AR statistics
+#Function to create AR model plot
+plot_ar_model <- function(df_site) {
+biomass_ts <- ts(df_site$AGB_Mean, start = c(year(min(df_site$Date)), month(min(df_site$Date))), frequency = 12)
 AR <- arima(biomass_ts, order = c(1,0,0))
-print(AR)
 AR_model <- biomass_ts - residuals(AR)
-print(AR_model)
+AR_model_se <- sqrt(diag(AR$var.coef))
+df_site$Date <- as.Date(df_site$Date)
+df_site$AR_model <- as.numeric(AR_model)
+df_site$AR_model_upper <- df_site$AR_model + 1.96 * AR_model_se
+df_site$AR_model_lower <- df_site$AR_model - 1.96 * AR_model_se
+ggplot(df_site, aes(x = Date)) +
+    geom_point(aes(y = AGB_Mean, color = "GEDI AGB"), size = 1.5) +
+    geom_line(aes(y = AGB_Mean, color = "GEDI AGB"), size = 0.5, linetype = "solid") +
+    geom_point(aes(y = AR_model, color = "AR Model"), size = 1.5) +
+    geom_line(aes(y = AR_model, color = "AR Model"), size = 0.5, linetype = "solid") +
+    geom_errorbar(aes(ymin = AGB_Mean - AGB_StErr, ymax = AGB_Mean + AGB_StErr, color = "GEDI AGB"), width = 0.2) +
+    geom_errorbar(aes(ymin = AR_model_lower, ymax = AR_model_upper, color = "AR Model"), width = 0.2) +
+    scale_color_manual(values = c("GEDI AGB" = "blue4", "AR Model" = "red")) +
+    labs(title = paste("Auto-Regression Model of GEDI Biomass:", unique(df_site$Site)),
+         x = "Date", y = "AGB (Mg/ha)", color = "Legend") +
+    theme_classic() +
+    theme(panel.grid.major = element_line(color = "grey95"),
+          panel.grid.minor = element_line(color = "grey95"),
+          panel.grid.minor.y = element_line(color = "gray95")) +
+    ylim(0, NA)
+}
 
-# Plot AR model for biomass series
-x_labels <- format(x, "%m/%y")
-plot(x_numeric, biomass_ts, type = 'n', xlab = '', ylab = 'AGB (Mg/ha)', main = 'Auto-Regression Model of GEDI Biomass: TKW', ylim = c(0, 250), xaxt = 'n')
-axis(1, at = x_numeric, labels = x_labels, las = 2)
-mtext("Time", side = 1, line = 4)
-abline(v = c(1, 12, 24, 36), col = 'gray', lty = 2)
-points(x_numeric, biomass_ts, type = "o", col = 'black', pch = 16)
-lines(x_numeric, AR_model, col = 'red', lty = 2)
-legend("topleft", legend = c('GEDI Biomass', 'AR Model'), col = c('black', 'red'), lty = c(1, 2), pch = c(16, NA))
+#Create AR model plots for each site
+plot_ar_list <- lapply(unique(site_data$Site), function(site) {
+df_site <- subset(site_data, Site == site)
+plot_ar_model(df_site)
+})
 
+#Display the plots
+plot_ar_list
 ```
+
 
 ## Interpretation of the Time Series Analysis
 

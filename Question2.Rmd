@@ -9,9 +9,9 @@ library(randomForest)
 library(Metrics)
 
 # Load the data
-data <- read.csv("/home/s1949330/Documents/scratch/diss_data/model/MODEL_INPUT.csv")
 
-# Prepare the data
+# Isolate data
+data <- read.csv("/home/s1949330/Documents/scratch/diss_data/model/MODEL_INPUT.csv")
 target_column <- 4
 predictor_columns <- 5:44 #ncol(data)
 target <- data[, target_column]
@@ -19,10 +19,6 @@ predictors <- data[, predictor_columns]
 columns_with_only_na <- names(predictors)[colSums(is.na(predictors)) == nrow(predictors)]
 predictors <- predictors[, colSums(is.na(predictors)) != nrow(predictors)]
 
-# State excluded variables
-if (length(columns_with_only_na) > 0) {
-  cat("Columns removed for only containing NAs:\n")
-  print(columns_with_only_na)}
 
 # Combine target and predictors into one data frame
 model_data <- data.frame(target, predictors)
@@ -66,7 +62,7 @@ knitr::opts_chunk$set(echo = TRUE)
 model_data <- model_data[order(model_data$target), ]
 
 # Define the number of segments
-num_segments <- 10
+num_segments <- 12
 
 # Calculate the number of data points per segment
 points_per_segment <- ceiling(nrow(model_data) / num_segments)
@@ -130,7 +126,7 @@ ggplot(segment_results, aes(x = Max_Target_Value)) +
   geom_hline(yintercept = R2 * 100, linetype = "dashed", color = "forestgreen") +
   labs(x = "Predicted AGB", y = "Percentage", title = "Model Sensitivity to AGB Magnitude") +
   scale_color_manual(name = "Performance Metric", values = c("R2" = "forestgreen", "RMSE%" = "blue", "MAE%" = "red")) +
-  theme_classic() + 
+  theme_light() + 
   theme(panel.grid.major = element_line(color = "grey95"),
         panel.grid.minor = element_line(color = "grey95"))
 
