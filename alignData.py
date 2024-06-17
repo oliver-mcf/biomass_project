@@ -30,6 +30,19 @@ def combine(csv_list, fixed_columns, output_csv):
     print(combined_df.shape)
     print(f'Successful merge of model input data into {output_csv}')
 
+def decibels(dn):
+    return 10 * np.log10(dn ** 2) - 83.0
+
+def convert_palsar(file_path, output_path):
+    df = pd.read_csv(file_path)
+    columns_to_correct = ['HH_Median', 'HH_StDev', 'HH_95', 'HH_05', 
+                          'HV_Median', 'HV_StDev', 'HV_95', 'HV_05']
+    for col in columns_to_correct:
+        if col in df.columns:
+            df[col] = df[col].apply(decibels)
+    df.to_csv(output_path, index = False)
+    print(f'Successful conversion of PALSAR data from DN to dB')
+
 
 # Code #############################################################################################################
 if __name__ == '__main__':
@@ -55,6 +68,10 @@ if __name__ == '__main__':
     # Align and export combined model input data
     output_csv = '/home/s1949330/Documents/scratch/diss_data/model/MODEL_INPUT.csv'
     combine(csv_list, fixed_columns, output_csv)
+
+    # Convert Palsar data to decibels
+    convert_palsar(output_csv, output_csv)
+
 
     # Visual check of variable names
     #combined_df = pd.read_csv(output_csv)

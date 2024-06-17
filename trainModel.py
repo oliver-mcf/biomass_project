@@ -9,15 +9,15 @@ from libraries import *
 def isolate(filename):
     df = pd.read_csv(filename)
     df = df.drop(columns = ['Source'])
-    #df = df.drop(columns = ['01_NDVI_Median', '02_NDVI_Median', '03_NDVI_Median', '04_NDVI_Median'])
-    df = df.loc[:, ~ df.columns.str.contains('_NDVI_Median')]
+    #df = df.drop(columns = ['01_NDVI_Median', '02_NDVI_Median', '03_NDVI_Median', '04_NDVI_Median'])       # FilteredMonths
+    #df = df.loc[:, ~ df.columns.str.contains('_NDVI_Median')]                                              # RemovedMonths
     df = df.dropna()
     input = df['GEDI_AGB']
     coords = df[['GEDI_X', 'GEDI_Y']]
-    predictors = df.loc[:,'SR_B2_Median':'SRTM_mTPI']
+    predictors = df.loc[:,'SR_B2_Median':'HV_05']
     # Landsat = SR_B2_Median : SRTM_mTPI
     # Sentinel = SR_B2_Median : VH_05
-    # Palsar = SR_B2_Median : 
+    # Palsar = SR_B2_Median : 'HV_05
     print('Available Points for Model Training: {:,}'.format(len(predictors)))
     return input, predictors, coords
 
