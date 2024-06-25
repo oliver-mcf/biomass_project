@@ -29,19 +29,19 @@ class GeoTiff:
         self.x = self.xOrigin + valid_indices[1] * self.pixelWidth
         self.y = self.yOrigin + valid_indices[0] * self.pixelHeight
 
-def intersect(gedi, landsat_filename):
+def intersect(gedi, file):
     '''Isolate GEDI footprint indices in Landsat data'''
-    landsat = GeoTiff(landsat_filename)
+    var = GeoTiff(file)
     nGedi = len(gedi.footprints)
-    landsat_intersect = np.full(nGedi, -999, dtype = float)
+    var_intersect = np.full(nGedi, -999, dtype = float)
     for j in range(nGedi):
         x = gedi.x[j]
         y = gedi.y[j]
-        xInd = np.floor((x - landsat.xOrigin) / landsat.pixelWidth).astype(int)
-        yInd = np.floor((y - landsat.yOrigin) / landsat.pixelHeight).astype(int)
-        if 0 <= xInd < landsat.nX and 0 <= yInd < landsat.nY:
-            landsat_intersect[j] = landsat.data[yInd, xInd]
-    return landsat_intersect
+        xInd = np.floor((x - var.xOrigin) / var.pixelWidth).astype(int)
+        yInd = np.floor((y - var.yOrigin) / var.pixelHeight).astype(int)
+        if 0 <= xInd < var.nX and 0 <= yInd < var.nY:
+            var_intersect[j] = var.data[yInd, xInd]
+    return var_intersect
 
 def extract(gedi, pred_vars):
     '''Extract GEDI footprints and intersecting predictor variable data'''
@@ -62,8 +62,8 @@ def export(array, labels, site, year):
     df = pd.DataFrame(array, columns = column_names)
     pprint(df.head())
     print(df.shape)
-    df.to_csv(f'/home/s1949330/Documents/scratch/diss_data/model/{site}_{year}_INPUT_DATA.csv', index = False)
-    print(f"Successful export: /scratch/diss_data/model/{site}_{year}_INPUT_DATA.csv\n")
+    df.to_csv(f'/home/s1949330/Documents/scratch/diss_data/model/csv/{site}_{year}_INPUT_DATA.csv', index = False)
+    print(f"Successful export: /scratch/diss_data/model/csv/{site}_{year}_INPUT_DATA.csv")
  
 
 # Code #############################################################################################################

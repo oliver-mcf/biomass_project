@@ -47,8 +47,20 @@ def convert_palsar(file):
 # Code #############################################################################################################
 if __name__ == '__main__':
     
+    # Define command line arguments
+    parser = argparse.ArgumentParser(description = 'Combine CSV files for model training')
+    parser.add_argument('--site', help = 'Site name to filter CSV files')
+    args = parser.parse_args()
+    
     # Identify all model input data
     csv_list = glob(f'/home/s1949330/Documents/scratch/diss_data/model/csv/*.csv')
+
+    if args.site:
+        csv_list = [csv for csv in csv_list if os.path.basename(csv).startswith(args.site)]
+        output_csv = f'/home/s1949330/Documents/scratch/diss_data/model/{args.site}_MODEL_INPUT.csv'
+    else:
+        output_csv = '/home/s1949330/Documents/scratch/diss_data/model/MODEL_INPUT.csv'
+    
     fixed_columns = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB',
                      'SR_B2_Median', 'SR_B2_StDev', 'SR_B2_p95', 'SR_B2_p05', 
                      'SR_B3_Median', 'SR_B3_StDev', 'SR_B3_p95', 'SR_B3_p05',
@@ -56,17 +68,16 @@ if __name__ == '__main__':
                      'SR_B5_Median', 'SR_B5_StDev', 'SR_B5_p95', 'SR_B5_p05',
                      'SR_B6_Median', 'SR_B6_StDev', 'SR_B6_p95', 'SR_B6_p05',
                      'SR_B7_Median', 'SR_B7_StDev', 'SR_B7_p95', 'SR_B7_p05',
-                     '08_NDVI_Median', '09_NDVI_Median', '10_NDVI_Median', '11_NDVI_Median', '12_NDVI_Median', '01_NDVI_Median',
-                     '02_NDVI_Median', '03_NDVI_Median', '04_NDVI_Median', '05_NDVI_Median', '06_NDVI_Median', '07_NDVI_Median',
+                     'T1_NDVI_Median', 'T2_NDVI_Median', 'T3_NDVI_Median',
                      'NDVI_Wet95', 'NDVI_Wet05', 'NDVI_Dry95', 'NDVI_Dry05', 'NDVI_Gradient',
                      'SRTM_Elevation', 'SRTM_Slope', 'SRTM_mTPI',
                      'VV_Median', 'VV_StDev', 'VV_95', 'VV_05',
                      'VH_Median', 'VH_StDev', 'VH_95', 'VH_05',
                      'HH_Median', 'HH_StDev', 'HH_95', 'HH_05',
-                     'HV_Median', 'HV_StDev', 'HV_95', 'HV_05']
+                     'HV_Median', 'HV_StDev', 'HV_95', 'HV_05',
+                     'HHHV_Ratio', 'HHHV_Index']
     
     # Align and export combined model input data
-    output_csv = '/home/s1949330/Documents/scratch/diss_data/model/MODEL_INPUT.csv'
     combine(csv_list, fixed_columns, output_csv)
 
     # Convert Palsar data to decibels
