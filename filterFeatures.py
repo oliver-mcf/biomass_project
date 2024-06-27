@@ -46,9 +46,32 @@ def matrix(csv_file):
     df_filtered.to_csv(output_csv, index = False)
     print(f"Filtered data saved to: {output_csv}")
 
+def reduce(ref_csv, csv_list):
+    ref_df = pd.read_csv(ref_csv)
+    ref_columns = set(ref_df.columns)
+    for csv_file in csv_list:
+        df = pd.read_csv(csv_file)
+        common_columns = ref_columns.intersection(df.columns)
+        filtered_df = df[common_columns]
+        output = csv_file.replace('.csv', '_FILTER.csv')
+        filtered_df.to_csv(output, index = False)
+        print(f"Site filtered data saved to: {output}")
+
 
 # Code #############################################################################################################
 if __name__ == '__main__':
 
+    # Define command line arguments
+    parser = argparse.ArgumentParser(description = 'Random Forest Model Training and Evaluation')
+    parser.add_argument('--reduce', action = 'store_true', help = 'Perform reduce function to reduce columns based on a reference CSV')
+    args = parser.parse_args()
+
+    # Filter predictor variables by correlation coefficients
     csv_file = '/home/s1949330/Documents/scratch/diss_data/model/MODEL_INPUT.csv'
     matrix(csv_file)
+
+    # Match site specific subsets by filtered predictor variables
+    if args.reduce:
+        csv_list = glob('/home/s1949330/Documents/scratch/diss_data/model/*_MODEL_INPUT.csv')
+        ref_csv = '/home/s1949330/Documents/scratch/diss_data/model/MODEL_INPUT_FILTER.csv'
+        reduce(ref_csv, csv_list)
