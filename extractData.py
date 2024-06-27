@@ -13,16 +13,19 @@ class GeoTiff:
 
     def read(self, filename):
         '''Read geotiff data'''
+        # Read file metadata
         ds = gdal.Open(filename)
         proj = osr.SpatialReference(wkt = ds.GetProjection())
         self.crs = proj.GetAttrValue('AUTHORITY', 1)
-        self.nX = ds.RasterXSize             # number of pixels in x direction
-        self.nY = ds.RasterYSize             # number of pixels in y direction
-        transform_ds = ds.GetGeoTransform()  # extract geolocation information
-        self.xOrigin = transform_ds[0]       # coordinate of x corner
-        self.yOrigin = transform_ds[3]       # coordinate of y corner
-        self.pixelWidth = transform_ds[1]    # resolution in x direction
-        self.pixelHeight = transform_ds[5]   # resolution in y direction
+        self.nX = ds.RasterXSize
+        self.nY = ds.RasterYSize
+        # Extract geolocation information
+        transform_ds = ds.GetGeoTransform()
+        self.xOrigin = transform_ds[0]
+        self.yOrigin = transform_ds[3]
+        self.pixelWidth = transform_ds[1]
+        self.pixelHeight = transform_ds[5]
+        # Store pixel data
         self.data = ds.GetRasterBand(1).ReadAsArray(0, 0, self.nX, self.nY)
         self.footprints = self.data[~np.isnan(self.data)]
         valid_indices = np.where(~np.isnan(self.data))
@@ -30,13 +33,15 @@ class GeoTiff:
         self.y = self.yOrigin + valid_indices[0] * self.pixelHeight
 
 def intersect(gedi, file):
-    '''Isolate GEDI footprint indices in Landsat data'''
+    '''Isolate GEDI footprint indices in predictor variables'''
     var = GeoTiff(file)
     nGedi = len(gedi.footprints)
-    var_intersect = np.full(nGedi, -999, dtype = float)
+    var_intersect = np.full(nGedi, np.nan, dtype = float)
     for j in range(nGedi):
+        # Isolate pixel indices of target data
         x = gedi.x[j]
         y = gedi.y[j]
+        # Calculate corresponding pixel indices of predictor data
         xInd = np.floor((x - var.xOrigin) / var.pixelWidth).astype(int)
         yInd = np.floor((y - var.yOrigin) / var.pixelHeight).astype(int)
         if 0 <= xInd < var.nX and 0 <= yInd < var.nY:
@@ -45,23 +50,26 @@ def intersect(gedi, file):
 
 def extract(gedi, pred_vars):
     '''Extract GEDI footprints and intersecting predictor variable data'''
+    # Extract intersecting pixels in predictor data
     all_intersects = []
     for var in tqdm(pred_vars, desc = "Processing predictor variables..."):
         intersecting_data = intersect(gedi, var)
         all_intersects.append(intersecting_data)
+    # Align target data and predictor data
     all_intersects = np.array(all_intersects).T
     gedi_coordinates = np.column_stack((gedi.x, gedi.y))
     gedi_values = gedi.footprints.reshape((-1, 1))
     extracted_data = np.hstack((gedi_coordinates, gedi_values, all_intersects))
-    extracted_data[extracted_data == 0] = np.nan
     return extracted_data
 
 def export(array, labels, site, year):
+    '''Save GEDI and predictor variable data as CSV'''
+    # Set predictor variable names
     var_names = [os.path.splitext(os.path.basename(label))[0] for label in labels]
     column_names = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB'] + var_names
     df = pd.DataFrame(array, columns = column_names)
     pprint(df.head())
-    print(df.shape)
+    pprint(df.shape)
     df.to_csv(f'/home/s1949330/Documents/scratch/diss_data/model/csv/{site}_{year}_INPUT_DATA.csv', index = False)
     print(f"Successful export: /scratch/diss_data/model/csv/{site}_{year}_INPUT_DATA.csv")
  
