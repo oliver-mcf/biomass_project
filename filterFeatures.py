@@ -62,16 +62,19 @@ def reduce(ref_csv, csv_list):
 if __name__ == '__main__':
 
     # Define command line arguments
-    parser = argparse.ArgumentParser(description = 'Random Forest Model Training and Evaluation')
-    parser.add_argument('--reduce', action = 'store_true', help = 'Perform reduce function to reduce columns based on a reference CSV')
+    parser = argparse.ArgumentParser(description = 'Filtering Predictor Variables for Model Input')
+    parser.add_argument('--filter', action = 'store_true', help = 'Filter predictor variables of main model input csv')
+    parser.add_argument('--reduce', action = 'store_true', help = 'Reduce predictor variables in site specific data based on previous filtering')
     args = parser.parse_args()
 
     # Filter predictor variables by correlation coefficients
-    csv_file = '/home/s1949330/Documents/scratch/diss_data/model/MODEL_INPUT.csv'
-    matrix(csv_file)
+    if args.filter:
+        csv_file = '/home/s1949330/Documents/scratch/diss_data/model/MODEL_INPUT.csv'
+        matrix(csv_file)
 
     # Match site specific subsets by filtered predictor variables
     if args.reduce:
-        csv_list = glob('/home/s1949330/Documents/scratch/diss_data/model/*_MODEL_INPUT.csv')
         ref_csv = '/home/s1949330/Documents/scratch/diss_data/model/MODEL_INPUT_FILTER.csv'
+        csv_list = ['/home/s1949330/Documents/scratch/diss_data/model/MGR_MODEL_INPUT.csv', 
+                    '/home/s1949330/Documents/scratch/diss_data/model/MGR_MODEL_INPUT.csv']
         reduce(ref_csv, csv_list)
