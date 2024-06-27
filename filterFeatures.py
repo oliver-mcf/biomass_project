@@ -15,7 +15,6 @@ def matrix(csv_file):
     mask = np.eye(len(correlation_matrix), dtype = bool)
     plt.rcParams['font.family'] = 'Arial'
     plt.figure(figsize = (24, 20))
-
     # Visualise correlation matrix
     sns.heatmap(correlation_matrix, annot = True, fmt = ".1f", cmap = 'coolwarm', square = True, 
                 cbar_kws = {"shrink": .5}, mask = mask, vmin = -1, vmax = 1)
@@ -24,7 +23,6 @@ def matrix(csv_file):
     plt.title('Correlation Matrix Heatmap')
     plt.savefig('/home/s1949330/Documents/scratch/diss_data/model/CORRELATION_MATRIX.png', dpi = 300)
     plt.show()
-
     # Isolate variables with no coefficients > 0.9
     variables_to_remove = set()
     variables_to_keep = set(correlation_matrix.columns)
@@ -41,7 +39,6 @@ def matrix(csv_file):
     variables_to_keep -= variables_to_remove
     variables_to_remove = sorted(list(variables_to_remove))
     variables_to_keep = sorted(list(variables_to_keep))
-    
     # Filter original predictor variables
     variables_to_keep = original_columns + list(variables_to_keep)
     df_filtered = df[variables_to_keep]
