@@ -90,7 +90,7 @@ def scatter(y_test, y_pred, folder, label):
     ax.set_xlabel('Observed AGB (Mg/ha)')
     ax.set_ylabel('Predicted AGB (Mg/ha)')
     ax.legend()
-    plt.savefig(f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_MODEL_TEST.png')
+    plt.savefig(f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_MODEL_SCATTER.png')
     plt.show()
 
 def hist(y_test, y_pred, folder, label):
@@ -100,21 +100,21 @@ def hist(y_test, y_pred, folder, label):
     #Plot 2D histogram
     plt.rcParams['font.family'] = 'Arial'
     fig, ax = plt.subplots(figsize = (10, 8))
-    plt.hist2d(y_test, y_pred, bins = (100,100), cmap = 'viridis', cmin = 1)
+    plt.hist2d(y_test, y_pred, bins = (100,100), cmap = 'Purples', cmin = 5)
     cbar = plt.colorbar(shrink = 0.75)
     ax.plot([0,300], [0,300], ls = 'solid', color = 'k')
     # PLot line of best fit
     slope, intercept = np.polyfit(y_test, y_pred, 1)
     best_fit = slope * np.array(y_test) + intercept
     ax.plot(y_test, best_fit, ls = 'solid', color = 'red', label = 'Linear')
-    ax.set_xlim([0, 300])
-    ax.set_ylim([0, 300])
-    ax.set_xticks(np.arange(0, 320, 20))
-    ax.set_yticks(np.arange(0, 320, 20))
+    ax.set_xlim([0, 200])
+    ax.set_ylim([0, 200])
+    ax.set_xticks(np.arange(0, 220, 20))
+    ax.set_yticks(np.arange(0, 220, 20))
     ax.set_xlabel('Observed AGB (Mg/ha)')
     ax.set_ylabel('Predicted AGB (Mg/ha)')
     ax.legend()
-    plt.savefig(f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_MODEL_TEST.png')
+    plt.savefig(f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_MODEL_HIST.png')
     plt.show()
 
 
@@ -167,6 +167,6 @@ if __name__ == '__main__':
     hist(y_test, y_pred, args.folder, args.label)
 
     # VStore variable importance
-    variable_importance(args.folderargs.label, x.columns)
+    variable_importance(args.folder, args.label, x.columns)
 
 
