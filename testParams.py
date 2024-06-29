@@ -30,9 +30,9 @@ if __name__ == '__main__':
 
     # Isolate target and predictor variables
     if args.site == '':
-        input_filename = '/home/s1949330/Documents/scratch/diss_data/model/MODEL_INPUT_FILTER.csv'
+        input_filename = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FILTER.csv'
     else:
-        input_filename = f'/home/s1949330/Documents/scratch/diss_data/model/{args.site}_MODEL_INPUT_FILTER.csv'
+        input_filename = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/{args.site}_MODEL_INPUT_FILTER.csv'
     y, x, coords = isolate(input_filename, args.label)
 
     # Split sampled data for model training
