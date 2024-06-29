@@ -128,14 +128,14 @@ if __name__ == '__main__':
     parser.add_argument('--sample', action = 'store_true', help = 'Condition to use a sample of the training data')
     parser.add_argument('--split', type = float, default = 0.3, help = 'Ratio for splitting the data into training and testing sets; default = 0.3')
     parser.add_argument('--trees', type = int, default = 200, help = 'Number of estimators to train random forest model; default = 200')
-    parser.add_argument('--folder', type = str, help = 'Directory folder for model outputs')
+    parser.add_argument('--folder', type = str, help = 'Directory folder for model outputs within: .../diss_data/model/')
     args = parser.parse_args()
     
     # Isolate target and predictor variables
     if args.site == '':
-        input_filename = '/home/s1949330/Documents/scratch/diss_data/model/MODEL_INPUT_FILTER.csv'
+        input_filename = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FILTER.csv'
     else:
-        input_filename = f'/home/s1949330/Documents/scratch/diss_data/model/{args.site}_MODEL_INPUT_FILTER.csv'
+        input_filename = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/{args.site}_MODEL_INPUT_FILTER.csv'
     y, x, coords = isolate(input_filename, args.label)
 
     # Split data for model training
