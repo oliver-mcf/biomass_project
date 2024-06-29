@@ -100,7 +100,7 @@ def hist(y_test, y_pred, folder, label):
     #Plot 2D histogram
     plt.rcParams['font.family'] = 'Arial'
     fig, ax = plt.subplots(figsize = (10, 8))
-    plt.hist2d(y_test, y_pred, bins = (100,100), cmap = 'Purples', cmin = 5)
+    plt.hist2d(y_test, y_pred, bins = (100,100), cmap = 'turbo', cmin = 10)
     cbar = plt.colorbar(shrink = 0.75)
     ax.plot([0,300], [0,300], ls = 'solid', color = 'k')
     # PLot line of best fit
@@ -140,10 +140,10 @@ if __name__ == '__main__':
 
     # Split data for model training
     if args.sample:
-        sample_indices = random.sample(range(len(x)), k = int(0.1 * len(x)))
+        sample_indices = random.sample(range(len(x)), k = int(0.25 * len(x)))
         x_sampled = x.iloc[sample_indices]
         y_sampled = y.iloc[sample_indices]
-        print('Random Training Data Sample Size: {:,}'.format(len(x_sampled)))
+        print('Training Data Sample Size: {:,}'.format(len(x_sampled)))
         x_train, x_test, y_train, y_test = split(x_sampled, y_sampled, split_ratio = args.split)
     else: 
         x_train, x_test, y_train, y_test = split(x, y, split_ratio = args.split)
