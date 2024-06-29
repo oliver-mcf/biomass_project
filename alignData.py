@@ -7,6 +7,7 @@ from libraries import *
 
 # Objects & Methods ################################################################################################
 def combine(csv_list, fixed_columns, output_csv):
+    '''Merge initial intersecting data noting source file'''
     combined_df = pd.DataFrame(columns = ['Source'] + fixed_columns)
     for csv in csv_list:
         df = pd.read_csv(csv)
@@ -31,9 +32,12 @@ def combine(csv_list, fixed_columns, output_csv):
     print(f'Successful merge of model input data into {output_csv}')
 
 def decibels(dn):
+    '''Calculate decibels from digital numbers'''
+    # Formula from Rosenqvist et al, 2007
     return 10 * np.log10(dn ** 2) - 83.0
 
-def convert_palsar(file):
+def convert(file):
+    '''Convert all palsar variables to decibels'''
     df = pd.read_csv(file)
     columns_to_correct = ['HH_Median', 'HH_StDev', 'HH_95', 'HH_05', 
                           'HV_Median', 'HV_StDev', 'HV_95', 'HV_05']
@@ -81,5 +85,5 @@ if __name__ == '__main__':
     combine(csv_list, fixed_columns, output_csv)
 
     # Convert Palsar data to decibels
-    convert_palsar(output_csv)
+    convert(output_csv)
 
