@@ -199,7 +199,7 @@ def cross_validation(x, y, coords, args):
                              'RMSE': round(sqrt(mean_squared_error(all_y_test, all_y_pred)), 3),
                              'RMSE': round((sqrt(mean_squared_error(y_test, y_pred)) / np.mean(y_test)) * 100),
                              'LM/F/P': (white_test[0], white_test[2], white_test[1])})
-    return all_y_test, all_y_pred, validation_stats
+    return validation_stats
 
 
 # Code #############################################################################################################
@@ -212,7 +212,7 @@ if __name__ == '__main__':
     parser.add_argument('--sample', action = 'store_true', help = 'Condition to use a sample of the training data')
     parser.add_argument('--split', type = float, default = 0.3, help = 'Ratio for splitting the data into training and testing sets; default = 0.3')
     parser.add_argument('--trees', type = int, default = 200, help = 'Number of estimators to train random forest model; default = 200')
-    parser.add_argument('--folder', type = str, help = 'Directory folder for model outputs within: .../diss_data/model/')
+    parser.add_argument('--folder', type = str, help = 'Output folder for model  within: .../diss_data/model/')
     parser.add_argument('--kfolds', type = int, help = 'Number of folds for K-Fold Cross-Validation; if used, use 5')
     args = parser.parse_args()
     
@@ -238,6 +238,6 @@ if __name__ == '__main__':
     variable_importance(args.folder, args.label, x.columns)
 
     # Perform k-fold cross validation
-    if args.kfolds > 1:
-        all_y_test, all_y_pred, validation_stats = cross_validation(x, y, coords, args)
-        print(f'K-Fold Cross-Validation Results: {validation_stats}')
+    #if args.kfolds > 1:
+    #    all_y_test, all_y_pred, validation_stats = cross_validation(x, y, coords, args)
+    #    print(f'K-Fold Cross-Validation Results: {validation_stats}')
