@@ -33,8 +33,7 @@ def combine(csv_list, fixed_columns, output_csv):
 
 def decibels(dn):
     '''Calculate decibels from digital numbers'''
-    # Formula from Rosenqvist et al, 2007
-    return 10 * np.log10(dn ** 2) - 83.0
+    return 10 * np.log10(dn ** 2) - 83.0    # Rosenqvist et al, 2007
 
 def convert(file):
     '''Convert all palsar variables to decibels'''
