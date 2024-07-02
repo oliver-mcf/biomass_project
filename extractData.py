@@ -88,12 +88,12 @@ if __name__ == '__main__':
     input_var = f'/home/s1949330/Documents/scratch/diss_data/gedi/{args.site}/{args.year}_GEDI_AGB.tif'
     gedi = GeoTiff(input_var)
 
-    # Read Landsat data
+    # Read predictor variables
     vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/{args.year}_*.tif')
     srtm_vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/SRTM_*.tif')
     pred_vars = sorted(vars + srtm_vars)
 
-    # Extract GEDI footprints and intersecting Landsat pixels
+    # Extract GEDI footprints and intersecting pixels
     extracted_data = extract(gedi, pred_vars)
 
     # Export labelled variables to csv
