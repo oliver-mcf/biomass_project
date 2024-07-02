@@ -7,62 +7,62 @@ from libraries import *
 
 # Objects & Methods ################################################################################################
 def matrix(csv_file, coef):
-    '''Create correlation matrix for predictor variables'''
-    # Isolate predictor variables and perform correlation matrix
+    '''Create correlation matrix for predictor variables and filter highly correlated ones.'''
     df = pd.read_csv(csv_file)
     original_columns = ['Source', 'GEDI_X', 'GEDI_Y', 'GEDI_AGB']
-    predictor_columns = df.columns[4:].tolist()
+    predictor_columns = df.columns[4:]
+
+    # Compute the correlation matrix
     correlation_matrix = df[predictor_columns].corr()
-    mask = np.eye(len(correlation_matrix), dtype = bool)
+
+    # Plot and save the correlation matrix heatmap
     plt.rcParams['font.family'] = 'Arial'
-    plt.figure(figsize=(24, 20))
-    # Visualise correlation matrix
+    plt.figure(figsize = (24, 20))
     sns.heatmap(correlation_matrix, annot = True, fmt = ".1f", cmap = 'coolwarm', square = True,
-                cbar_kws = {"shrink": .5}, mask = mask, vmin = -1, vmax = 1)
-    for i in range(len(correlation_matrix)):
-        plt.gca().add_patch(plt.Rectangle((i, i), 1, 1, fill = True, color = 'black', lw = 0))
-    plt.title('Correlation Matrix Heatmap')
+                cbar_kws = {"shrink": .5}, mask = np.eye(len(correlation_matrix), dtype = bool),
+                vmin = -1, vmax = 1)
+    plt.title('Predictor Variable Correlation Matrix')
     plt.savefig('/home/s1949330/Documents/scratch/diss_data/pred_vars/CORRELATION_MATRIX.png', dpi = 300)
-    #plt.show()
-    # Identify variables to keep based on correlation threshold
-    variables_to_keep = set()
-    variables_to_remove = set()
+    plt.close()
+
+    # Identify and remove highly correlated variables
+    variables_to_keep = set(predictor_columns)
     for i in range(len(correlation_matrix.columns)):
-        if correlation_matrix.columns[i] not in variables_to_remove:
-            found_high_corr = False
-            for j in range(i + 1, len(correlation_matrix.columns)):
-                if correlation_matrix.columns[j] not in variables_to_remove:
-                    if abs(correlation_matrix.iloc[i, j]) >= coef:
-                        if not found_high_corr:
-                            variables_to_keep.add(correlation_matrix.columns[i])
-                            found_high_corr = True
-                        variables_to_remove.add(correlation_matrix.columns[j])
-            if not found_high_corr:
-                variables_to_keep.add(correlation_matrix.columns[i])
+        for j in range(i + 1, len(correlation_matrix.columns)):
+            if abs(correlation_matrix.iloc[i, j]) >= coef:
+                if correlation_matrix.columns[j] in variables_to_keep:
+                    variables_to_keep.remove(correlation_matrix.columns[j])
+    
     print("Variables to be removed:")
+    variables_to_remove = set(predictor_columns) - variables_to_keep
     print("Number of variables removed:", len(variables_to_remove))
     pprint(variables_to_remove)
     print("Variables to be kept:")
     print("Number of variables kept:", len(variables_to_keep))
     pprint(variables_to_keep)
+
+    # Save the filtered dataframe to a new CSV file
     variables_to_keep = original_columns + list(variables_to_keep)
-    # Remove highly correlated predictor variables
     df_filtered = df[variables_to_keep]
     output_csv = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FINAL.csv'
     df_filtered.to_csv(output_csv, index = False)
     print(f"Filtered data saved to: {output_csv}")
 
-def reduce(ref_csv, csv_list):
+def reduce(ref_csv, csv_list, output_dir):
     '''Reduce predictor variables by established threshold for sites'''
+    # Read already filtered csv
     ref_df = pd.read_csv(ref_csv)
     ref_columns = set(ref_df.columns)
+    # Reduce predictor variables in site csvs
     for csv_file in csv_list:
         df = pd.read_csv(csv_file)
         common_columns = ref_columns.intersection(df.columns)
         filtered_df = df[common_columns]
-        output = csv_file.replace('_MERGE.csv', '_FINAL.csv')
-        filtered_df.to_csv(output, index = False)
-        print(f"Site filtered data saved to: {output}")
+        # Write newly filtered site input data to csv
+        filename = os.path.basename(csv_file).replace('_MERGE.csv', '_FINAL.csv')
+        output_path = os.path.join(output_dir, filename)
+        filtered_df.to_csv(output_path, index = False)
+        print(f"Site filtered data saved to: {output_path}")
 
 
 # Code #############################################################################################################
@@ -85,4 +85,5 @@ if __name__ == '__main__':
         ref_csv = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FINAL.csv'
         csv_list = ['/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/MGR_MODEL_INPUT_MERGE.csv', 
                     '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/TKW_MODEL_INPUT_MERGE.csv']
-        reduce(ref_csv, csv_list)
+        output_dir = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/'
+        reduce(ref_csv, csv_list, output_dir)
