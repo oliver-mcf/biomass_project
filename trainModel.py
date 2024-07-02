@@ -217,10 +217,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     # Isolate target and predictor variables
-    if args.site == '':
-        input_filename = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FILTER.csv'
-    else:
-        input_filename = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/{args.site}_MODEL_INPUT_FILTER.csv'
+    input_filename = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/{args.site}_MODEL_INPUT_FILTER.csv' if args.site else '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FILTER.csv'
     y, x, coords = isolate_data(input_filename, args.label)
 
     # Split data for model training
@@ -237,7 +234,7 @@ if __name__ == '__main__':
     model_scatter(y_test, y_pred, args.folder, args.label)
     model_hist(y_test, y_pred, args.folder, args.label)
 
-    # Store variable importance
+    # Save variable importances
     variable_importance(args.folder, args.label, x.columns)
 
     # Perform k-fold cross validation
