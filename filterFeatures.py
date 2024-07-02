@@ -22,8 +22,8 @@ def matrix(csv_file, coef):
     for i in range(len(correlation_matrix)):
         plt.gca().add_patch(plt.Rectangle((i, i), 1, 1, fill = True, color = 'black', lw = 0))
     plt.title('Correlation Matrix Heatmap')
-    plt.savefig('/home/s1949330/Documents/scratch/diss_data/model/pred_vars/CORRELATION_MATRIX.png', dpi=300)
-    plt.show()
+    plt.savefig('/home/s1949330/Documents/scratch/diss_data/pred_vars/CORRELATION_MATRIX.png', dpi = 300)
+    #plt.show()
     # Identify variables to keep based on correlation threshold
     variables_to_keep = set()
     variables_to_remove = set()
@@ -48,7 +48,7 @@ def matrix(csv_file, coef):
     variables_to_keep = original_columns + list(variables_to_keep)
     # Remove highly correlated predictor variables
     df_filtered = df[variables_to_keep]
-    output_csv = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FILTER.csv'
+    output_csv = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FINAL.csv'
     df_filtered.to_csv(output_csv, index = False)
     print(f"Filtered data saved to: {output_csv}")
 
@@ -60,7 +60,7 @@ def reduce(ref_csv, csv_list):
         df = pd.read_csv(csv_file)
         common_columns = ref_columns.intersection(df.columns)
         filtered_df = df[common_columns]
-        output = csv_file.replace('.csv', '_FILTER.csv')
+        output = csv_file.replace('_MERGE.csv', '_FINAL.csv')
         filtered_df.to_csv(output, index = False)
         print(f"Site filtered data saved to: {output}")
 
@@ -77,12 +77,12 @@ if __name__ == '__main__':
 
     # Filter predictor variables by correlation coefficients
     if args.filter:
-        csv_file = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/MODEL_INPUT.csv'
+        csv_file = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/MODEL_INPUT_MERGE.csv'
         matrix(csv_file, args.coef)
 
     # Match site specific subsets by filtered predictor variables
     if args.reduce:
-        ref_csv = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FILTER.csv'
-        csv_list = ['/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/MGR_MODEL_INPUT.csv', 
-                    '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/TKW_MODEL_INPUT.csv']
+        ref_csv = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FINAL.csv'
+        csv_list = ['/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/MGR_MODEL_INPUT_MERGE.csv', 
+                    '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/TKW_MODEL_INPUT_MERGE.csv']
         reduce(ref_csv, csv_list)

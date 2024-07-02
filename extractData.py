@@ -80,7 +80,7 @@ if __name__ == '__main__':
 
     # Define command line arguments
     parser = argparse.ArgumentParser(description = "Extract data for a given site over given year(s).")
-    parser.add_argument("site", help = "Study site by SEOSAW abbreviation.")
+    parser.add_argument("--site", help = "Study site by SEOSAW abbreviation.")
     parser.add_argument("--year", help = "End of austral year, eg: for Aug 2019 to July 2020, give 20 for 2020.")
     args = parser.parse_args()
 

@@ -35,7 +35,7 @@ def isolate_data(filename, label):
     print('Training Data Sample Size: {:,}'.format(len(x)))
     return y, x, coords
 
-def split_data(x, y, split_ratio, sample = False):
+def split_data(x, y, split_ratio, sample=False):
     '''Subset Available Data for Training and Testing'''
     # Sample available data and split for model training and testing
     if sample:
@@ -43,9 +43,9 @@ def split_data(x, y, split_ratio, sample = False):
         x_sampled = x.iloc[sample_indices]
         y_sampled = y.iloc[sample_indices]
         print('Training Data Sample Size: {:,}'.format(len(x_sampled)))
-        x_train, x_test, y_train, y_test = train_test_split(x_sampled, y_sampled, split_ratio = split_ratio)
+        x_train, x_test, y_train, y_test = train_test_split(x_sampled, y_sampled, test_size = split_ratio)
     else:
-        x_train, x_test, y_train, y_test = train_test_split(x, y, split_ratio = split_ratio)
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = split_ratio)
     return x_train, x_test, y_train, y_test
 
 def save_splits(x_train, y_train, x_test, y_test, coords, args):
@@ -142,7 +142,7 @@ def model_hist(y_test, y_pred, folder, label):
     # Plot 2D histogram
     plt.rcParams['font.family'] = 'Arial'
     fig, ax = plt.subplots(figsize = (10, 8))
-    plt.hist2d(y_test, y_pred, bins = (100,100), cmap = 'turbo', cmin = 10)
+    plt.hist2d(y_test, y_pred, bins = (100,100), cmap = 'turbo', cmin = 5)
     cbar = plt.colorbar(shrink = 0.75)
     ax.plot([0,300], [0,300], ls = 'solid', color = 'k')
     # Plot line of best fit
@@ -213,15 +213,15 @@ if __name__ == '__main__':
     parser.add_argument('--split', type = float, default = 0.3, help = 'Ratio for splitting the data into training and testing sets; default = 0.3')
     parser.add_argument('--trees', type = int, default = 200, help = 'Number of estimators to train random forest model; default = 200')
     parser.add_argument('--folder', type = str, help = 'Directory folder for model outputs within: .../diss_data/model/')
-    parser.add_argument('--kfolds', type = int, default = 5, help = 'Number of folds for K-Fold Cross-Validation; default = 5')
+    parser.add_argument('--kfolds', type = int, help = 'Number of folds for K-Fold Cross-Validation; if used, use 5')
     args = parser.parse_args()
     
     # Isolate target and predictor variables
-    input_filename = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/{args.site}_MODEL_INPUT_FILTER.csv' if args.site else '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FILTER.csv'
+    input_filename = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/{args.site}_MODEL_INPUT_FINAL.csv' if args.site else '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FINAL.csv'
     y, x, coords = isolate_data(input_filename, args.label)
 
     # Split data for model training
-    x_train, x_test, y_train, y_test = split_data(x, y, split_ratio = args.split, sample = args.sample)
+    x_train, x_test, y_train, y_test = split_data(x, y, split_ratio = args.split)
 
     # Save model training data
     save_splits(x_train, y_train, x_test, y_test, coords, args)

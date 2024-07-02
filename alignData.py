@@ -11,7 +11,7 @@ def combine(csv_list, fixed_columns, output_csv):
     combined_df = pd.DataFrame(columns = ['Source'] + fixed_columns)
     for csv in csv_list:
         df = pd.read_csv(csv)
-        df['Source'] = os.path.basename(csv)
+        df['Source'] = os.path.basename(csv)[:6]
         column_mapping = {}
         for col in df.columns:
             for fixed_col in fixed_columns:
@@ -56,13 +56,13 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     # Identify all model input data
-    csv_list = glob(f'/home/s1949330/Documents/scratch/diss_data/model/csv/*.csv')
+    csv_list = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_init/*.csv')
 
     if args.site:
         csv_list = [csv for csv in csv_list if os.path.basename(csv).startswith(args.site)]
-        output_csv = f'/home/s1949330/Documents/scratch/diss_data/model/{args.site}_MODEL_INPUT.csv'
+        output_csv = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/{args.site}_MODEL_INPUT_MERGE.csv'
     else:
-        output_csv = '/home/s1949330/Documents/scratch/diss_data/model/MODEL_INPUT.csv'
+        output_csv = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/MODEL_INPUT_MERGE.csv'
     
     fixed_columns = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB',
                      'SR_B2_Median', 'SR_B2_StDev', 'SR_B2_p95', 'SR_B2_p05', 
