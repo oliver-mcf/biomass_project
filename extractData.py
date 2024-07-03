@@ -41,7 +41,7 @@ def get_epsg(dataset):
 
 def reproject(file_list, epsg):
     '''Reproject geotiff files with EPSG code'''
-    for file in tqdm(file_list, desc = 'Reprojecting files...', unit = 'file'):
+    for file in tqdm(file_list, desc = 'REPROJECT', unit = 'file'):
         ds = gdal.Open(file)
         # Identify files to reproject
         init_epsg = get_epsg(ds)
@@ -52,15 +52,16 @@ def reproject(file_list, epsg):
             ds_reproj = None
         ds = None
 
-def get_res(dataset):
+def get_res(file):
     '''Retrieve geotiff pixel resolution'''
-    res = dataset.GetGeoTransform()[1]
-    dataset = None
+    ds = gdal.Open(file)
+    res = ds.GetGeoTransform()[1]
+    ds = None
     return res
 
 def resample(file_list, res):
     '''Resample geotiff files to set resolution'''
-    for file in tqdm(file_list, desc = 'Resampling files...', unit = 'file'):
+    for file in tqdm(file_list, desc = 'RESAMPLE', unit = 'file'):
         ds = gdal.Open(file)
         # Identify files to resample
         init_res = ds.GetGeoTransform()[1]
@@ -83,14 +84,15 @@ def intersect(gedi, file):
         xInd = np.floor((x - var.xOrigin) / var.pixelWidth).astype(int)
         yInd = np.floor((y - var.yOrigin) / var.pixelHeight).astype(int)
         if 0 <= xInd < var.nX and 0 <= yInd < var.nY:
-            var_intersect[j] = var.data[yInd, xInd]
+            pixel_value = var.data[yInd, xInd]
+            var_intersect[j] = pixel_value
     return var_intersect
 
 def extract(gedi, pred_vars):
     '''Extract GEDI footprints and intersecting predictor variable data'''
     # Extract intersecting pixels in predictor data
     all_intersects = []
-    for var in tqdm(pred_vars, desc = "Processing predictor variables..."):
+    for var in tqdm(pred_vars, desc = "EXTRACT"):
         intersecting_data = intersect(gedi, var)
         all_intersects.append(intersecting_data)
     # Align target data and predictor data
@@ -106,10 +108,13 @@ def export(array, labels, site, year):
     var_names = [os.path.splitext(os.path.basename(label))[0] for label in labels]
     column_names = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB'] + var_names
     df = pd.DataFrame(array, columns = column_names)
-    pprint(df.head())
-    pprint(df.shape)
+    df_sorted = df.sort_values(by = 'GEDI_AGB').reset_index(drop = True)
+    print(df_sorted.head())
+    print(df_sorted.shape)
     output = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_init/{site}_{year}_INPUT_DATA.csv'
-    df.to_csv(output, index = False)
+    df_sorted.to_csv(output, index = False)
+    df_sorted = df_sorted.dropna()
+    print(len(df_sorted))
     print(f"Successful export:", output)
  
 
@@ -133,7 +138,7 @@ if __name__ == '__main__':
 
     # Reproject all variables
     var_list = [input_var] + pred_vars
-    reproject(var_list, '3857')
+    reproject(var_list, epsg = '3857')
 
     # Resample predictor variables to GEDI resolution
     gedi_res = get_res(input_var)
