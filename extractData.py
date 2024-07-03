@@ -39,18 +39,36 @@ def get_epsg(dataset):
     epsg = srs.GetAttrValue('AUTHORITY', 1)
     return epsg
 
-def check_projection(files):
-    for file in files:
+def reproject(file_list, epsg):
+    '''Reproject geotiff files with EPSG code'''
+    for file in tqdm(file_list, desc = 'Reprojecting files...', unit = 'file'):
         ds = gdal.Open(file)
-        epsg = get_epsg(ds)
-        incorrect = []
-        if epsg != '4326':
-            var = file.rsplit('/', 1)[-1].rsplit('.', 1)[0]
-            incorrect.append(var)
+        # Identify files to reproject
+        init_epsg = get_epsg(ds)
+        if init_epsg != epsg:
+            output_file = file
+            # Perform reprojection
+            ds_reproj = gdal.Warp(output_file, ds, dstSRS = f"EPSG:{epsg}", format = 'GTiff')
+            ds_reproj = None
         ds = None
-    if len(incorrect) == 0:
-            print('All files projected in EPSG:4326')
-        
+
+def get_res(dataset):
+    '''Retrieve geotiff pixel resolution'''
+    res = dataset.GetGeoTransform()[1]
+    dataset = None
+    return res
+
+def resample(file_list, res):
+    '''Resample geotiff files to set resolution'''
+    for file in tqdm(file_list, desc = 'Resampling files...', unit = 'file'):
+        ds = gdal.Open(file)
+        # Identify files to resample
+        init_res = ds.GetGeoTransform()[1]
+        if init_res != res:
+            output_file = file
+            ds_res = gdal.Warp(output_file, ds, xRes = res, yRes = res, resampleAlg = 'bilinear', format = 'GTiff')  
+            ds_res = None
+        ds = None
 
 def intersect(gedi, file):
     '''Isolate GEDI footprint indices in predictor variables'''
@@ -107,13 +125,19 @@ if __name__ == '__main__':
     # Read GEDI data
     input_var = f'/home/s1949330/Documents/scratch/diss_data/gedi/{args.site}/{args.year}_GEDI_AGB.tif'
     gedi = GeoTiff(input_var)
-    check_projection(gedi)
 
     # Read predictor variables
     vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/{args.year}_*.tif')
     srtm_vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/SRTM_*.tif')
     pred_vars = sorted(vars + srtm_vars)
-    check_projection(pred_vars)
+
+    # Reproject all variables
+    var_list = input_var + pred_vars
+    reproject(var_list, '3857')
+
+    # Resample predictor variables to GEDI resolution
+    gedi_res = get_res(input_var)
+    resample(pred_vars, gedi_res)
 
     # Extract GEDI footprints and intersecting pixels
     extracted_data = extract(gedi, pred_vars)
