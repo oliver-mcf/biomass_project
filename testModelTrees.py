@@ -5,7 +5,20 @@ from libraries import *
 
 
 # Objects & Methods ################################################################################################
-from trainModel import isolate_data, split_data
+from trainModel import isolate_data
+
+def split_data(x, y, split_ratio, sample = False):
+    '''Subset Available Data for Training and Testing'''
+    # Sample available data and split for model training and testing
+    if sample:
+        sample_indices = random.sample(range(len(x)), k = int(0.10 * len(x)))
+        x_sampled = x.iloc[sample_indices]
+        y_sampled = y.iloc[sample_indices]
+        print('Training Data Sample Size: {:,}'.format(len(x_sampled)))
+        x_train, x_test, y_train, y_test = train_test_split(x_sampled, y_sampled, test_size = split_ratio)
+    else:
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = split_ratio)
+    return x_train, x_test, y_train, y_test
 
 def param_train(x_train, y_train, trees):
     rf = RandomForestRegressor(n_estimators = trees, random_state = random.seed())
