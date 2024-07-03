@@ -118,8 +118,8 @@ if __name__ == '__main__':
 
     # Define command line arguments
     parser = argparse.ArgumentParser(description = "Extract data for a given site over given year(s).")
-    parser.add_argument("--site", help = "Study site by SEOSAW abbreviation.")
-    parser.add_argument("--year", help = "End of austral year, eg: for Aug 2019 to July 2020, give 20 for 2020.")
+    parser.add_argument("--site", required = True, help = "Study site by SEOSAW abbreviation.")
+    parser.add_argument("--year", required = True, help = "End of austral year, eg: for Aug 2019 to July 2020, give 20 for 2020.")
     args = parser.parse_args()
 
     # Read GEDI data
@@ -132,7 +132,7 @@ if __name__ == '__main__':
     pred_vars = sorted(vars + srtm_vars)
 
     # Reproject all variables
-    var_list = input_var + pred_vars
+    var_list = [input_var] + pred_vars
     reproject(var_list, '3857')
 
     # Resample predictor variables to GEDI resolution
