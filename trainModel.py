@@ -1,5 +1,5 @@
 
-# Train Model with Input Data
+# Train Model with Available Input Data
 
 # Libraries ########################################################################################################
 from libraries import *
@@ -130,7 +130,7 @@ def variable_importance(folder, label, var_names, fold = None):
             scaled_importance = importances[idx] * 100
             writer.writerow([var_names[idx], scaled_importance])
 
-def model_scatter(y_test, y_pred, folder, label, model):
+def model_scatter(y_test, y_pred, folder, label, model, single_output = False):
     '''Plot Scatter of Observed and Predicted Values'''
     # Constrain values to model sensitivity
     mask = (y_test < 300) & (y_pred < 300)
@@ -152,10 +152,11 @@ def model_scatter(y_test, y_pred, folder, label, model):
     ax.set_xlabel('Observed AGB (Mg/ha)')
     ax.set_ylabel('Predicted AGB (Mg/ha)')
     ax.set_title(f'{label} Model - Observed vs Predicted')
-    plt.savefig(f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_MODEL_SCATTER_FOLD{model + 1}.png', dpi = 300)
+    fig_name = f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_MODEL_SCATTER.png' if single_output else f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_MODEL_SCATTER_FOLD{model + 1}.png'
+    plt.savefig(fig_name, dpi = 300)
     plt.close(fig)
 
-def model_hist(y_test, y_pred, folder, label, model):
+def model_hist(y_test, y_pred, folder, label, model, single_output):
     '''Plot Histogram of Observed and Predicted Values'''
     # Constrain values to model sensitivity
     mask = (y_test < 300) & (y_pred < 300)
@@ -177,7 +178,8 @@ def model_hist(y_test, y_pred, folder, label, model):
     ax.set_xlabel('Observed AGB (Mg/ha)')
     ax.set_ylabel('Predicted AGB (Mg/ha)')
     ax.set_title(f'{label} Model - Observed vs Predicted')
-    plt.savefig(f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_MODEL_HIST_FOLD{model + 1}.png', dpi = 300)
+    fig_name = f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_MODEL_HIST.png' if single_output else f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_MODEL_HIST_FOLD{model + 1}.png'
+    plt.savefig(fig_name, dpi = 300)
     plt.close(fig)
 
 def cross_validation(x, y, sample, kfolds, label, trees, folder):
