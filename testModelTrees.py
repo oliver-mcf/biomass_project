@@ -35,7 +35,7 @@ def param_test(rf, x_test, y_test):
 if __name__ == '__main__':
     
     # Define command line arguments
-    parser = argparse.ArgumentParser(description = 'Random Forest Model Training and Evaluation')
+    parser = argparse.ArgumentParser(description = 'Assess Random Forest Model Performance by Number of Trees')
     parser.add_argument('--label', type = str, choices = ['Landsat', 'Sentinel', 'Palsar', 'All', 'Test'], required = True, help = 'Keyword for selecting predictor variables')
     parser.add_argument('--test', action = 'store_true', help = 'Adopt a smaller sample size of the available training data for testing')
     parser.add_argument('--subset', type = float, default = 0.10, help = 'Proportion of original dataset kept for testing, 0-1')
@@ -43,7 +43,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Isolate target and predictor variables
-    input_filename = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FINALcsv'
+    input_filename = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FINAL.csv'
     y, x, _ = isolate_data(input_filename, args.label)
 
     # Generate random subset of training data
@@ -51,6 +51,7 @@ if __name__ == '__main__':
         sample_indices = random.sample(range(len(x)), k = int(args.subset * len(x)))
         x = x.iloc[sample_indices]
         y = y.iloc[sample_indices]
+        print('Training Data Sample Size: {:,}'.format(len(x)))
 
     # Split sampled data for model training
     x_train, x_test, y_train, y_test = split_data(x, y, split_ratio = args.split)
@@ -62,4 +63,5 @@ if __name__ == '__main__':
     for n_estimators in n_estimators_list:
         rf = param_train(x_train, y_train, n_estimators)
         r2, y_pred = param_test(rf, x_test, y_test)
-        print(f'Trees: {n_estimators}, R2: {r2:.3f}')
+        r = stats.pearsonr(y_test, y_pred)[0]
+        print(f'Trees: {n_estimators}, R: {r:.3f}, R2: {r2:.3f}')
