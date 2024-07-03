@@ -139,7 +139,7 @@ def model_scatter(y_test, y_pred, folder, label, model, single_output = False):
     plt.savefig(fig_name, dpi = 300)
     plt.close(fig)
 
-def model_hist(y_test, y_pred, folder, label, model, single_output):
+def model_hist(y_test, y_pred, folder, label, model, single_output = False):
     '''Plot Histogram of Observed and Predicted Values'''
     # Constrain values to model sensitivity
     mask = (y_test < 300) & (y_pred < 300)
