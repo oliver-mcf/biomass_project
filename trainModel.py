@@ -29,9 +29,6 @@ def isolate_data(filename, label):
         exclude_substrings = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB']
         combined_cols = [col for col in df.columns if not any(substring in col for substring in exclude_substrings)]
         x = df.loc[:, combined_cols]
-    elif label == "Test":
-        test_cols = [col for col in df.columns if col.startswith(('SRTM', 'T'))]
-        x = df.loc[:, test_cols]
     print('Training Data Sample Size: {:,}'.format(len(x)))
     return y, x, coords
 
