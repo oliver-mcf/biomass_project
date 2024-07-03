@@ -32,6 +32,26 @@ class GeoTiff:
         self.x = self.xOrigin + valid_indices[1] * self.pixelWidth
         self.y = self.yOrigin + valid_indices[0] * self.pixelHeight
 
+def get_epsg(dataset):
+    proj = dataset.GetProjection()
+    srs = osr.SpatialReference()
+    srs.ImportFromWkt(proj)
+    epsg = srs.GetAttrValue('AUTHORITY', 1)
+    return epsg
+
+def check_projection(files):
+    for file in files:
+        ds = gdal.Open(file)
+        epsg = get_epsg(ds)
+        incorrect = []
+        if epsg != '4326':
+            var = file.rsplit('/', 1)[-1].rsplit('.', 1)[0]
+            incorrect.append(var)
+        ds = None
+    if len(incorrect) == 0:
+            print('All files projected in EPSG:4326')
+        
+
 def intersect(gedi, file):
     '''Isolate GEDI footprint indices in predictor variables'''
     var = GeoTiff(file)
@@ -87,11 +107,13 @@ if __name__ == '__main__':
     # Read GEDI data
     input_var = f'/home/s1949330/Documents/scratch/diss_data/gedi/{args.site}/{args.year}_GEDI_AGB.tif'
     gedi = GeoTiff(input_var)
+    check_projection(gedi)
 
     # Read predictor variables
     vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/{args.year}_*.tif')
     srtm_vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/SRTM_*.tif')
     pred_vars = sorted(vars + srtm_vars)
+    check_projection(pred_vars)
 
     # Extract GEDI footprints and intersecting pixels
     extracted_data = extract(gedi, pred_vars)
