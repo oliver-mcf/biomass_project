@@ -35,32 +35,15 @@ def isolate_data(filename, label):
     print('Training Data Sample Size: {:,}'.format(len(x)))
     return y, x, coords
 
-def split_data(x, y, split_ratio, sample = False):
-    '''Subset Available Data for Training and Testing'''
-    # Sample available data and split for model training and testing
-    if sample:
-        sample_indices = random.sample(range(len(x)), k = int(0.10 * len(x)))
-        x_sampled = x.iloc[sample_indices]
-        y_sampled = y.iloc[sample_indices]
-        print('Training Data Sample Size: {:,}'.format(len(x_sampled)))
-        x_train, x_test, y_train, y_test = train_test_split(x_sampled, y_sampled, test_size = split_ratio)
-    else:
-        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = split_ratio)
-    return x_train, x_test, y_train, y_test
-
 def save_splits(x_train, y_train, x_test, y_test, coords, args, fold = None):
     '''Save Training and Testing Subsets'''
     # Isolate subsets
     training_data = pd.concat([coords, pd.DataFrame(x_train), pd.DataFrame({'y_train': y_train})], axis = 1).dropna(subset = ['y_train'])
     testing_data = pd.concat([coords, pd.DataFrame(x_test), pd.DataFrame({'y_test': y_test})], axis = 1).dropna(subset = ['y_test'])
     # Consider site-specific condition
-    if args.site == '':
-        training_data_filename = f'/home/s1949330/Documents/scratch/diss_data/model/{args.folder}/{args.label}_MODEL_TRAINING.csv'
-        testing_data_filename = f'/home/s1949330/Documents/scratch/diss_data/model/{args.folder}/{args.label}_MODEL_TESTING.csv'
-    else:
-        training_data_filename = f'/home/s1949330/Documents/scratch/diss_data/model/{args.folder}/{args.site}_{args.label}_MODEL_TRAINING.csv'
-        testing_data_filename = f'/home/s1949330/Documents/scratch/diss_data/model/{args.folder}/{args.site}_{args.label}_MODEL_TESTING.csv'
-    # If fold is provided, append fold number to the filenames
+    training_data_filename = f'/home/s1949330/Documents/scratch/diss_data/model/{args.folder}/{args.label}_MODEL_TRAINING.csv'
+    testing_data_filename = f'/home/s1949330/Documents/scratch/diss_data/model/{args.folder}/{args.label}_MODEL_TESTING.csv'
+    # Consider iterative model training and testing
     if fold is not None:
         training_data_filename = training_data_filename.replace('.csv', f'_FOLD{fold + 1}.csv')
         testing_data_filename = testing_data_filename.replace('.csv', f'_FOLD{fold + 1}.csv')
@@ -221,7 +204,6 @@ if __name__ == '__main__':
     
     # Define command line arguments
     parser = argparse.ArgumentParser(description = 'Random Forest Model Training with K-Fold Cross Validation')
-    parser.add_argument('--site', default = '', help = 'Site-specific identifier for model training')
     parser.add_argument('--label', required = True, help = 'Predictor label (e.g., Landsat, Sentinel, Palsar, All, Test)')
     parser.add_argument('--folder', required = True, help = 'Folder to save results')
     parser.add_argument('--kfolds', type = int, required = True, help = 'Number of k-folds for cross-validation')
@@ -231,7 +213,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Isolate target and predictor variables
-    input_filename = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/{args.site}_MODEL_INPUT_FINAL.csv' if args.site else '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FINAL.csv'
+    input_filename = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FINAL.csv'
     y, x, coords = isolate_data(input_filename, args.label)
 
     # Perform k-fold cross validation for model training    
