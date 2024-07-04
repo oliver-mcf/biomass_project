@@ -36,7 +36,7 @@ if __name__ == '__main__':
     
     # Define command line arguments
     parser = argparse.ArgumentParser(description = 'Assess Random Forest Model Performance by Number of Trees')
-    parser.add_argument('--label', type = str, choices = ['Landsat', 'Sentinel', 'Palsar', 'All', 'Test'], required = True, help = 'Keyword for selecting predictor variables')
+    parser.add_argument('--label', type = str, choices = ['Landsat', 'Sentinel', 'Palsar', 'All'], required = True, help = 'Keyword for selecting predictor variables')
     parser.add_argument('--test', action = 'store_true', help = 'Adopt a smaller sample size of the available training data for testing')
     parser.add_argument('--subset', type = float, default = 0.10, help = 'Proportion of original dataset kept for testing, 0-1')
     parser.add_argument('--split', type = float, default = 0.3, help = 'Ratio for splitting the data into training and testing sets')
