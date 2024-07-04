@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     # Define the new command line arguments
     parser = argparse.ArgumentParser(description = 'Train and test a Random Forest model using data from different sites')
-    parser.add_argument('--label', required = True, help = 'Predictor label (e.g., Landsat, Sentinel, Palsar, All, Test)')
+    parser.add_argument('--label', required = True, help = 'Predictor label (e.g., Landsat, Sentinel, Palsar, All)')
     parser.add_argument('--folder', required = True, help = 'Folder to save results')
     parser.add_argument('--trainSite', required = True, help = 'Site for training data')
     parser.add_argument('--testSite', required = True, help = 'Site for testing data')
@@ -42,4 +42,3 @@ if __name__ == '__main__':
 
     # Store variable importances
     variable_importance(args.folder, args.label, x_train.columns)
-    
