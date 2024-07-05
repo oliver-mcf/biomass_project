@@ -6,12 +6,19 @@ from libraries import *
 
 
 # Objects & Methods ################################################################################################
+from trainModel import isolate_data
+
 def matrix(df, label, coef, figure_dir, output_csv):
     '''Create correlation matrix for predictor variables and filter highly correlated ones.'''
-    original_columns = ['Source', 'GEDI_X', 'GEDI_Y', 'GEDI_AGB']
-    predictor_columns = df.columns[4:]
-    # Compute the correlation matrix
-    correlation_matrix = df[predictor_columns].corr()
+    # Compute the correlation matrix allowing for various procesisng stages
+    gedi_cols = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB']
+    if all(col in df.columns for col in gedi_cols):
+        original_columns = ['Source', 'GEDI_X', 'GEDI_Y', 'GEDI_AGB']
+        predictor_columns = df.columns[4:]
+        correlation_matrix = df[predictor_columns].corr()
+    else:
+        predictor_columns = df.columns
+        correlation_matrix = df.corr()
     # Plot and save the correlation matrix heatmap
     plt.rcParams['font.family'] = 'Arial'
     plt.figure(figsize = (24, 20))
@@ -28,16 +35,16 @@ def matrix(df, label, coef, figure_dir, output_csv):
             if abs(correlation_matrix.iloc[i, j]) >= coef:
                 if correlation_matrix.columns[j] in variables_to_keep:
                     variables_to_keep.remove(correlation_matrix.columns[j])
-    
-    print("Variables to be removed:")
     variables_to_remove = set(predictor_columns) - variables_to_keep
-    print("Number of variables removed:", len(variables_to_remove))
+    print("Variables removed:", len(variables_to_remove))
     pprint(variables_to_remove)
-    print("Variables to be kept:")
-    print("Number of variables kept:", len(variables_to_keep))
+    print("Variables retained:", len(variables_to_keep))
     pprint(variables_to_keep)
     # Save the filtered dataframe to a new CSV file
-    variables_to_keep = original_columns + list(variables_to_keep)
+    if all(col in df.columns for col in gedi_cols):
+        variables_to_keep = original_columns + list(variables_to_keep)
+    else:
+        variables_to_keep = list(variables_to_keep)
     df_filtered = df[variables_to_keep]
     df_filtered.to_csv(output_csv, index = False)
     print(f"Filtered data saved to: {output_csv}")
@@ -72,15 +79,20 @@ if __name__ == '__main__':
 
     # Filter predictor variables by correlation coefficients
     if args.filter:
-        df = pd.read_csv('/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/MODEL_INPUT_MERGE.csv')
-        output_csv = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/{args.label}_MODEL_INPUT_FINAL.csv'
-        figure_dir = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/{args.label}/'
-        matrix(df, args.label, args.coef, figure_dir, output_csv)
+        
+        # Isolate variables by group/label given
+        csv_file = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/All_MODEL_INPUT_MERGE.csv'
+        x = isolate_data(csv_file, args.label, filter = True)
 
-    # Match site specific subsets by filtered predictor variables
+        # Perform correlation matrix and remove pairs above threshold
+        output_csv = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/{args.label}_MODEL_INPUT_FINAL.csv'
+        figure_dir = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/'
+        matrix(x, args.label, args.coef, figure_dir, output_csv)
+        
+    # Reduce site data to match filtered predictor variables
     if args.reduce:
-        csv_list = ['/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/MGR_MODEL_INPUT_MERGE.csv', 
-                    '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/TKW_MODEL_INPUT_MERGE.csv']
+        csv_list = ['/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/All_MGR_MODEL_INPUT_MERGE.csv', 
+                    '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/All_TKW_MODEL_INPUT_MERGE.csv']
         ref_csv = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_MODEL_INPUT_FINAL.csv'
         output_dir = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/'
         reduce(ref_csv, csv_list, output_dir)
