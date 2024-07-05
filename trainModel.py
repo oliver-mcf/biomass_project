@@ -84,16 +84,14 @@ def test_model(x_test, y_test, folder, label, fold = None):
         'R2': r2_score(y_test, y_pred),
         'Bias': np.sum(y_pred - y_test) / y_pred.shape[0],
         'MAE': np.mean(np.abs(y_test - y_pred)),
+        'MAE%': np.mean(np.abs(y_test - y_pred)) / np.mean(y_test) * 100,
         'RMSE': sqrt(mean_squared_error(y_test, y_pred)),
+        'RMSE%': sqrt(mean_squared_error(y_test, y_pred)) / np.mean(y_test) * 100,
         'LM': white_test[0],
         'F': white_test[2],
         'P': white_test[1]}
-    print(f'R: {stats_dict["R"]}')
-    print(f'R2: {stats_dict["R2"]:.3f}')
-    print(f'Bias: {stats_dict["Bias"]:.3f} Mg/ha')
-    print(f'MAE: {stats_dict["MAE"]:.3f} Mg/ha   /   {(stats_dict["MAE"] / np.mean(y_test)) * 100:.3f} %')
-    print(f'RMSE: {stats_dict["RMSE"]:.3f} Mg/ha   /   {(stats_dict["RMSE"] / np.mean(y_test)) * 100:.3f} %')
-    print(f'LM/F/P: {stats_dict["LM"]:.0f} / {stats_dict["F"]:.0f} / {stats_dict["P"]:.2f}')
+    format_stats = {key: round(v, 3) for key, value in stats_dict.items()}
+    print(format_stats)
     return y_pred, stats_dict
 
 def variable_importance(folder, label, var_names, fold = None):
