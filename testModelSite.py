@@ -35,6 +35,9 @@ if __name__ == '__main__':
 
     # Test the model
     y_pred, stats_dict = test_model(x_test, y_test, args.folder, args.label)
+    # Save statistics to csv
+    stats_df = pd.DataFrame(stats_dict)
+    stats_df.to_csv(f'/home/s1949330/Documents/scratch/diss_data/model/{args.folder}/{args.label}_KFOLD_STATS.csv', index = False)
 
     # Visualize model performance
     model_scatter(y_test, y_pred, args.folder, args.label, model = 0, single_output = True)
