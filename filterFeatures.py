@@ -6,7 +6,7 @@ from libraries import *
 
 
 # Objects & Methods ################################################################################################
-def matrix(df, coef):
+def matrix(df, coef, output_csv):
     '''Create correlation matrix for predictor variables and filter highly correlated ones.'''
     original_columns = ['Source', 'GEDI_X', 'GEDI_Y', 'GEDI_AGB']
     predictor_columns = df.columns[4:]
@@ -39,7 +39,6 @@ def matrix(df, coef):
     # Save the filtered dataframe to a new CSV file
     variables_to_keep = original_columns + list(variables_to_keep)
     df_filtered = df[variables_to_keep]
-    output_csv = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FINAL.csv'
     df_filtered.to_csv(output_csv, index = False)
     print(f"Filtered data saved to: {output_csv}")
 
@@ -73,7 +72,8 @@ if __name__ == '__main__':
     # Filter predictor variables by correlation coefficients
     if args.filter:
         df = pd.read_csv('/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/MODEL_INPUT_MERGE.csv')
-        matrix(df, args.coef)
+        output_csv = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FINAL.csv'
+        matrix(df, args.coef, output_csv)
 
     # Match site specific subsets by filtered predictor variables
     if args.reduce:
