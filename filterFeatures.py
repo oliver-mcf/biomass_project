@@ -11,14 +11,9 @@ from trainModel import isolate_data
 def matrix(df, label, coef, output_dir, output_csv):
     '''Create correlation matrix for predictor variables and filter highly correlated ones.'''
     # Compute the correlation matrix allowing for various procesisng stages
-    gedi_cols = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB']
-    if all(col in df.columns for col in gedi_cols):
-        original_columns = ['Source', 'GEDI_X', 'GEDI_Y', 'GEDI_AGB']
-        predictor_columns = df.columns[4:]
-        correlation_matrix = df[predictor_columns].corr()
-    else:
-        predictor_columns = df.columns
-        correlation_matrix = df.corr()
+    gedi_columns = ['Source', 'GEDI_X', 'GEDI_Y', 'GEDI_AGB']
+    predictor_columns = [col for col in df.columns if col not in gedi_columns]
+    correlation_matrix = df[predictor_columns].corr()
     # Plot and save the correlation matrix heatmap
     plt.rcParams['font.family'] = 'Arial'
     if label == 'All':
@@ -43,11 +38,6 @@ def matrix(df, label, coef, output_dir, output_csv):
     pprint(variables_to_remove)
     print("Variables retained:", len(variables_to_keep))
     pprint(variables_to_keep)
-    # Adjust final list to include/exclude gedi variables
-    if all(col in df.columns for col in gedi_cols):
-        variables_to_keep = original_columns + list(variables_to_keep)
-    else:
-        variables_to_keep = list(variables_to_keep)
     # Save lists of removed and retained variables to a CSV file
     with open(f'{output_dir}{label}_FILTERED_VARIABLES.csv', mode = 'w', newline = '') as file:
         writer = csv.writer(file)
@@ -55,6 +45,7 @@ def matrix(df, label, coef, output_dir, output_csv):
         for keep, remove in zip_longest(variables_to_keep, variables_to_remove, fillvalue = ''):
             writer.writerow([keep, remove])
     # Save the filtered dataframe to a new CSV file
+    variables_to_keep = gedi_columns + list(variables_to_keep)
     df_filtered = df[variables_to_keep]
     df_filtered.to_csv(output_csv, index = False)
     print(f"Filtered data saved to: {output_csv}")
@@ -92,12 +83,12 @@ if __name__ == '__main__':
         
         # Isolate variables by group/label given
         csv_file = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/All_MODEL_INPUT_MERGE.csv'
-        x = isolate_data(csv_file, args.label, filter = True)
+        df = isolate_data(csv_file, args.label, filter = True)
 
         # Perform correlation matrix and remove pairs above threshold
         output_csv = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/{args.label}_MODEL_INPUT_FINAL.csv'
         output_dir = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/'
-        matrix(x, args.label, args.coef, output_dir, output_csv)
+        matrix(df, args.label, args.coef, output_dir, output_csv)
         
     # Reduce site data to match filtered predictor variables
     if args.reduce:
