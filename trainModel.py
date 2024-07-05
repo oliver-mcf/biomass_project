@@ -6,13 +6,14 @@ from libraries import *
 
 
 # Objects & Methods ################################################################################################
-def isolate_data(filename, label):
+def isolate_data(filename, label, filter = False):
     '''Isolate Predictor Variables for Various Model Configurations'''
     # Read input file
     df = pd.read_csv(filename)
     df = df.drop(columns = ['Source'])
     df = df.dropna()
     # Isolate target variables
+    source = df['Source']
     y = df['GEDI_AGB']
     coords = df[['GEDI_X', 'GEDI_Y']]
     # Set conditions for predictor variable inclusion
@@ -29,8 +30,12 @@ def isolate_data(filename, label):
         exclude_substrings = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB']
         combined_cols = [col for col in df.columns if not any(substring in col for substring in exclude_substrings)]
         x = df.loc[:, combined_cols]
-    print('Training Data Sample Size: {:,}'.format(len(x)))
-    return y, x, coords
+    if filter == True:
+        df_label = pd.concat([source, y, x, coords], axis = 1)
+        return df_label
+    else:
+        print('Training Data Sample Size: {:,}'.format(len(x)))
+        return y, x, coords
 
 def save_splits(x_train, y_train, x_test, y_test, coords, args, fold = None):
     '''Save Training and Testing Subsets'''
@@ -209,14 +214,11 @@ if __name__ == '__main__':
     parser.add_argument('--split', type = float, default = 0.3, help = 'Test split ratio')
     args = parser.parse_args()
 
-    # Isolate target and predictor variables
-    if args.label == 'All':
-        input_filename = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FINAL.csv'
-    elif args.label in ['Landsat', 'Palsar', 'Sentinel']:
-        input_filename = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/MODEL_INPUT_MERGE.csv'
+    # Isolate target and filtered predictor variables
+    input_filename = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/{args.label}_MODEL_INPUT_FINAL.csv'
     y, x, coords = isolate_data(input_filename, args.label)
 
-    # Perform k-fold cross validation for model training    
+    # Perform k-fold cross validation for model training
     cross_validation(x, y, args.sample, args.kfolds, args.label, args.trees, args.folder)
 
-
+    
