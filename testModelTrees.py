@@ -43,7 +43,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Isolate target and predictor variables
-    input_filename = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FINAL.csv'
+    input_filename = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_MODEL_INPUT_FINAL.csv'
     y, x, _ = isolate_data(input_filename, args.label)
 
     # Generate random subset of training data
