@@ -6,15 +6,12 @@ from libraries import *
 
 
 # Objects & Methods ################################################################################################
-def matrix(csv_file, coef):
+def matrix(df, coef):
     '''Create correlation matrix for predictor variables and filter highly correlated ones.'''
-    df = pd.read_csv(csv_file)
     original_columns = ['Source', 'GEDI_X', 'GEDI_Y', 'GEDI_AGB']
     predictor_columns = df.columns[4:]
-
     # Compute the correlation matrix
     correlation_matrix = df[predictor_columns].corr()
-
     # Plot and save the correlation matrix heatmap
     plt.rcParams['font.family'] = 'Arial'
     plt.figure(figsize = (24, 20))
@@ -24,7 +21,6 @@ def matrix(csv_file, coef):
     plt.title('Predictor Variable Correlation Matrix')
     plt.savefig('/home/s1949330/Documents/scratch/diss_data/pred_vars/CORRELATION_MATRIX.png', dpi = 300)
     plt.close()
-
     # Identify and remove highly correlated variables
     variables_to_keep = set(predictor_columns)
     for i in range(len(correlation_matrix.columns)):
@@ -40,7 +36,6 @@ def matrix(csv_file, coef):
     print("Variables to be kept:")
     print("Number of variables kept:", len(variables_to_keep))
     pprint(variables_to_keep)
-
     # Save the filtered dataframe to a new CSV file
     variables_to_keep = original_columns + list(variables_to_keep)
     df_filtered = df[variables_to_keep]
@@ -77,8 +72,8 @@ if __name__ == '__main__':
 
     # Filter predictor variables by correlation coefficients
     if args.filter:
-        csv_file = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/MODEL_INPUT_MERGE.csv'
-        matrix(csv_file, args.coef)
+        df = pd.read_csv('/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/MODEL_INPUT_MERGE.csv')
+        matrix(df, args.coef)
 
     # Match site specific subsets by filtered predictor variables
     if args.reduce:
