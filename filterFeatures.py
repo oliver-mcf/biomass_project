@@ -54,12 +54,13 @@ def reduce(ref_csv, csv_list, output_dir):
     '''Reduce predictor variables by established threshold for sites'''
     # Read already filtered csv
     ref_df = pd.read_csv(ref_csv)
-    ref_columns = set(ref_df.columns)
+    ref_columns = ref_df.columns.tolist()
     # Reduce predictor variables in site csvs
     for csv_file in csv_list:
         df = pd.read_csv(csv_file)
-        common_columns = ref_columns.intersection(df.columns)
+        common_columns = set(ref_columns).intersection(df.columns)
         filtered_df = df[common_columns]
+        filtered_df = filtered_df[ref_columns]
         # Write newly filtered site input data to csv
         filename = os.path.basename(csv_file).replace('_MERGE.csv', '_FINAL.csv')
         output_path = os.path.join(output_dir, filename)
@@ -72,7 +73,7 @@ if __name__ == '__main__':
 
     # Define command line arguments
     parser = argparse.ArgumentParser(description = 'Filtering Predictor Variables for Model Input')
-    parser.add_argument('--label', required = True, help = 'Predictor label (e.g., Landsat, Sentinel, Palsar, All)')
+    parser.add_argument('--label', help = 'Predictor label (e.g., Landsat, Sentinel, Palsar, All)')
     parser.add_argument('--filter', action = 'store_true', help = 'Filter predictor variables of main model input csv')
     parser.add_argument('--coef', type = float, help = 'Correlation coefficient threshold for filtering predictor variables')
     parser.add_argument('--reduce', action = 'store_true', help = 'Reduce predictor variables in site specific data based on previous filtering')
