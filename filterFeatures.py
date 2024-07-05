@@ -6,7 +6,7 @@ from libraries import *
 
 
 # Objects & Methods ################################################################################################
-def matrix(df, coef, output_csv):
+def matrix(df, label, coef, figure_dir, output_csv):
     '''Create correlation matrix for predictor variables and filter highly correlated ones.'''
     original_columns = ['Source', 'GEDI_X', 'GEDI_Y', 'GEDI_AGB']
     predictor_columns = df.columns[4:]
@@ -19,7 +19,7 @@ def matrix(df, coef, output_csv):
                 cbar_kws = {"shrink": .5}, mask = np.eye(len(correlation_matrix), dtype = bool),
                 vmin = -1, vmax = 1)
     plt.title('Predictor Variable Correlation Matrix')
-    plt.savefig('/home/s1949330/Documents/scratch/diss_data/pred_vars/CORRELATION_MATRIX.png', dpi = 300)
+    plt.savefig(f'{figure_dir}{label}_CORRELATION_MATRIX.png', dpi = 300)
     plt.close()
     # Identify and remove highly correlated variables
     variables_to_keep = set(predictor_columns)
@@ -64,6 +64,7 @@ if __name__ == '__main__':
 
     # Define command line arguments
     parser = argparse.ArgumentParser(description = 'Filtering Predictor Variables for Model Input')
+    parser.add_argument('--label', required = True, help = 'Predictor label (e.g., Landsat, Sentinel, Palsar, All)')
     parser.add_argument('--filter', action = 'store_true', help = 'Filter predictor variables of main model input csv')
     parser.add_argument('--coef', type = float, help = 'Correlation coefficient threshold for filtering predictor variables')
     parser.add_argument('--reduce', action = 'store_true', help = 'Reduce predictor variables in site specific data based on previous filtering')
@@ -72,13 +73,14 @@ if __name__ == '__main__':
     # Filter predictor variables by correlation coefficients
     if args.filter:
         df = pd.read_csv('/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/MODEL_INPUT_MERGE.csv')
-        output_csv = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FINAL.csv'
-        matrix(df, args.coef, output_csv)
+        output_csv = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/{args.label}_MODEL_INPUT_FINAL.csv'
+        figure_dir = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/{args.label}/'
+        matrix(df, args.label, args.coef, figure_dir, output_csv)
 
     # Match site specific subsets by filtered predictor variables
     if args.reduce:
-        ref_csv = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/MODEL_INPUT_FINAL.csv'
         csv_list = ['/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/MGR_MODEL_INPUT_MERGE.csv', 
                     '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/TKW_MODEL_INPUT_MERGE.csv']
+        ref_csv = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_MODEL_INPUT_FINAL.csv'
         output_dir = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/'
         reduce(ref_csv, csv_list, output_dir)
