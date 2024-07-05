@@ -60,9 +60,9 @@ if __name__ == '__main__':
 
     if args.site:
         csv_list = [csv for csv in csv_list if os.path.basename(csv).startswith(args.site)]
-        output_csv = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/{args.site}_MODEL_INPUT_MERGE.csv'
+        output_csv = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/All_{args.site}_MODEL_INPUT_MERGE.csv'
     else:
-        output_csv = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/MODEL_INPUT_MERGE.csv'
+        output_csv = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/All_MODEL_INPUT_MERGE.csv'
     
     fixed_columns = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB',
                      'SR_B2_Median', 'SR_B2_StDev', 'SR_B2_p95', 'SR_B2_p05', 
