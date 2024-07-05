@@ -90,7 +90,7 @@ def test_model(x_test, y_test, folder, label, fold = None):
         'LM': white_test[0],
         'F': white_test[2],
         'P': white_test[1]}
-    format_stats = {key: round(v, 3) for key, value in stats_dict.items()}
+    format_stats = {key: round(value, 3) for key, value in stats_dict.items()}
     print(format_stats)
     return y_pred, stats_dict
 
