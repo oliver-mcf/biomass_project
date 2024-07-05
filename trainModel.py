@@ -181,7 +181,7 @@ def cross_validation(x, y, sample, kfolds, label, trees, folder):
         train_model(x_train, y_train, label, trees, folder, fold)
         # Test model
         y_pred, stats_dict = test_model(x_test, y_test, folder, label, fold)
-        stats_dict['fold'] = fold + 1
+        stats_dict['Fold'] = fold + 1
         stats_list.append(stats_dict)
         # Save splits
         save_splits(x_train, y_train, x_test, y_test, x.index.to_series(), args, fold)
