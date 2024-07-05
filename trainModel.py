@@ -10,10 +10,11 @@ def isolate_data(filename, label, filter = False):
     '''Isolate Predictor Variables for Various Model Configurations'''
     # Read input file
     df = pd.read_csv(filename)
+    if filter == True:
+        source = df['Source']
     df = df.drop(columns = ['Source'])
     df = df.dropna()
     # Isolate target variables
-    source = df['Source']
     y = df['GEDI_AGB']
     coords = df[['GEDI_X', 'GEDI_Y']]
     # Set conditions for predictor variable inclusion
@@ -221,4 +222,3 @@ if __name__ == '__main__':
     # Perform k-fold cross validation for model training
     cross_validation(x, y, args.sample, args.kfolds, args.label, args.trees, args.folder)
 
-    
