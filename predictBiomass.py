@@ -97,7 +97,7 @@ if __name__ == '__main__':
     parser.add_argument("--folder", type = str, required = True, help = "Directory containing model.")
     parser.add_argument("--site", type = str, required = True, help = "Study site by SEOSAW abbreviation.")
     parser.add_argument("--year", type = int, required = True, help = "End of austral year, eg: for Aug 2019 to July 2020, give 20 for 2020.")
-    parser.add_argument("--batch", type = float, default = 0.02, help = 'Proportion of study site to compute predictions between 0-1, give 0.02 for 2 percent of data')
+    parser.add_argument("--batch", type = float, default = 0.05, help = 'Proportion of study site to compute predictions between 0-1 g: 0.05 for 5 percent')
     parser.add_argument("--bins", type = int, default = 20, help = 'Number of bins to arrange data in histogram')
     args = parser.parse_args()
 
