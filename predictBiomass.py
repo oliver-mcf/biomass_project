@@ -96,38 +96,43 @@ if __name__ == '__main__':
     parser.add_argument("--model", type = int, required = True, choices = [1, 2, 3, 4, 5], help = "Name of trained model to use for predictions")
     parser.add_argument("--folder", type = str, required = True, help = "Directory containing model.")
     parser.add_argument("--site", type = str, required = True, help = "Study site by SEOSAW abbreviation.")
-    parser.add_argument("--year", type = int, required = True, help = "End of austral year, eg: for Aug 2019 to July 2020, give 20 for 2020.")
+    #parser.add_argument("--year", type = int, required = True, help = "End of austral year, eg: for Aug 2019 to July 2020, give 20 for 2020.")
     parser.add_argument("--batch", type = float, default = 0.05, help = 'Proportion of study site to compute predictions between 0-1 g: 0.05 for 5 percent')
     parser.add_argument("--bins", type = int, default = 20, help = 'Number of bins to arrange data in histogram')
     args = parser.parse_args()
 
-    # Isolate filtered predictor variables
-    year_vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/{args.year}_*.tif')
-    vars = filter_vars(year_vars, args.year)
-    srtm_vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/SRTM_*.tif')
-    pred_vars = sorted(vars + srtm_vars)
-    
-    # Identify one reference variable
-    one_var = [f for f in pred_vars if os.path.basename(f) == f"{args.year}_HHHV_Ratio.tif"]
-    ref_var = GeoTiff(one_var[0])
+    # Iterate over years
+    year_list = ['20', '21', '22', '23']
+    for year in year_list:
+        print(f'Currently Predicting Biomass for 20{year}...')
 
-    # Prepare predictor variables
-    pred_flat = prepare_vars(pred_vars, ref_var)
-    print(pred_flat.shape)
+        # Isolate filtered predictor variables
+        year_vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/{year}_*.tif')
+        vars = filter_vars(year_vars, year)
+        srtm_vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/SRTM_*.tif')
+        pred_vars = sorted(vars + srtm_vars)
+        
+        # Identify one reference variable
+        one_var = [f for f in pred_vars if os.path.basename(f) == f"{year}_HHHV_Ratio.tif"]
+        ref_var = GeoTiff(one_var[0])
 
-    # Batch process model predictions
-    pred_agb = predict_agb(pred_flat, args.batch, args.folder, args.model)
+        # Prepare predictor variables
+        pred_flat = prepare_vars(pred_vars, ref_var)
+        print(pred_flat.shape)
 
-    # Sanity check biomass predictions 
-    print('Max:', np.max(pred_agb))
-    print('Mean:', np.mean(pred_agb))
-    print('Median:', np.median(pred_agb))
-    print('Min:', np.min(pred_agb))
+        # Batch process model predictions
+        pred_agb = predict_agb(pred_flat, args.batch, args.folder, args.model)
 
-    # Plot histogram of biomass predictions
-    pred_hist(pred_agb, args.bins, args.site, args.year, args.folder)
+        # Sanity check biomass predictions 
+        print('Max:', np.max(pred_agb))
+        print('Mean:', np.mean(pred_agb))
+        print('Median:', np.median(pred_agb))
+        print('Min:', np.min(pred_agb))
 
-    # Visualise biomass prediction
-    pred_map(pred_agb, ref_var, args.folder, args.site, args.year)
+        # Plot histogram of biomass predictions
+        pred_hist(pred_agb, args.bins, args.site, year, args.folder)
 
-    # Save biomass map as geotiff
+        # Visualise biomass prediction
+        pred_map(pred_agb, ref_var, args.folder, args.site, year)
+
+        # Save biomass map as geotiff
