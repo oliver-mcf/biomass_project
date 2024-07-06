@@ -24,23 +24,6 @@ def filter_vars(vars, year):
             year_vars.append(var)
     return year_vars
 
-def prepare_vars1(pred_vars):
-    '''Prepare Data for Model Predictions'''
-    # Iterate through predictor variables to read data
-    #flat_dataset = []
-    #for var in tqdm(pred_vars, desc = "PREPARE"):
-    for var in pred_vars:
-        pred = GeoTiff(var)
-        data = pred.data
-        print(pred.nX, pred.nY)
-        data_flat = data.flatten()
-        data_flat[np.isnan(data_flat)] = -999
-        #flat_dataset.append(data_flat)
-    # Align flattened predictor variables
-    #pred_flat = np.stack(flat_dataset, axis = -1)
-    #print(pred_flat.shape)
-    #return pred_flat
-
 def prepare_vars(pred_vars, ref_var, site):
     '''Prepare Data for Model Predictions'''
     # Set common dimensions for variables
