@@ -8,7 +8,23 @@ from libraries import *
 # Objects & Methods ################################################################################################
 from extractData import GeoTiff
 
-def prepare(pred_vars):
+def filter_vars(all_vars, label):
+    '''Filter Variables to Match Model Predictors'''
+    # Store variable names to retain
+    ref_csv = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/{label}_FILTERED_VARIABLES.csv'
+    df = pd.read_csv(ref_csv)
+    var_names = df['Retained']
+    print('Predictor Variables to Match: ', len(var_names))
+    # Retain variables found in reference df  
+    pred_vars = []
+    for var in tqdm(all_vars, desc = "FILTER"):
+        base = os.path.splitext(os.path.basename(var))[0]
+        if base in var_names:
+            pred_vars.append(var)
+    print('Predictor Variables Matched: ', len(pred_vars))
+    return pred_vars
+
+def prepare_vars(pred_vars):
     '''Prepare Data for Model Predictions'''
     # Iterate through predictor variables to read data
     flat_dataset = []
@@ -41,7 +57,7 @@ def pred_hist(data, bins, site, year):
     counts, bin_edges = np.histogram(data, bins = bins)
     bin_middles = 0.5 * (bin_edges[1:] + bin_edges[:-1])
     # Calculate smoothed line
-    spline = make_interp_spline(bin_middles, counts, k=3)
+    spline = make_interp_spline(bin_middles, counts, k = 3)
     bin_middles_smooth = np.linspace(bin_middles.min(), bin_middles.max(), 300)
     counts_smooth = spline(bin_middles_smooth)
     # Plot the histogram
@@ -70,11 +86,12 @@ if __name__ == '__main__':
 
     # Define command line arguments
     parser = argparse.ArgumentParser(description = "Extract data for a given site over given year(s).")
+    parser.add_argument('--label', type = str, default = 'All', help = "Predictor label to find filtered (by correlation matrix) variables (e.g., Landsat, Sentinel, Palsar, All)")
     parser.add_argument("--model", type = int, required = True, choices = [1, 2, 3, 4, 5], help = "Name of trained model to use for predictions")
     parser.add_argument("--folder", type = str, required = True, help = "Directory containing model.")
     parser.add_argument("--site", type = str, required = True, help = "Study site by SEOSAW abbreviation.")
     parser.add_argument("--year", type = int, required = True, help = "End of austral year, eg: for Aug 2019 to July 2020, give 20 for 2020.")
-    parser.add_argument("--batch", type = float, default = 0.02, help = 'Proportion of study site to compute predictions between 0-1, give 0.02 for 2% of data')
+    parser.add_argument("--batch", type = float, default = 0.02, help = 'Proportion of study site to compute predictions between 0-1, give 0.02 for 2 percent of data')
     args = parser.parse_args()
 
     # Identify predictor variables
@@ -83,10 +100,10 @@ if __name__ == '__main__':
     all_vars = sorted(vars + srtm_vars)
 
     # Isolate filtered predictor variables
-    pred_vars = 'function which takes a list of variables and matches that list with the variables retained in the model variables csv file'
+    pred_vars = filter_vars(all_vars, args.label)
 
     # Prepare predictor variables
-    pred_flat = prepare(pred_vars)
+    pred_flat = prepare_vars(pred_vars)
     print(pred_flat.shape)
 
     # Batch process model predictions
