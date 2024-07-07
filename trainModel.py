@@ -206,6 +206,7 @@ if __name__ == '__main__':
     # Define command line arguments
     parser = argparse.ArgumentParser(description = 'Random Forest Model Training with K-Fold Cross Validation')
     parser.add_argument('--label', required = True, help = 'Predictor label (e.g., Landsat, Sentinel, Palsar, All)')
+    parser.add_argument('--site', type = str, help = 'Condition to train and test model for specific site')
     parser.add_argument('--folder', required = True, help = 'Folder to save results')
     parser.add_argument('--kfolds', type = int, required = True, help = 'Number of k-folds for cross-validation')
     parser.add_argument('--sample', action = 'store_true', help = 'Adopt a smaller sample size of the available training data')
@@ -214,7 +215,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Isolate target and filtered predictor variables
-    input_filename = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/{args.label}_MODEL_INPUT_FINAL.csv'
+    input_filename = (f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/{args.label}_{args.site}_MODEL_INPUT_FINAL.csv'
+                      if args.site else 
+                      f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/{args.label}_MODEL_INPUT_FINAL.csv')
     y, x, coords = isolate_data(input_filename, args.label)
 
     # Perform k-fold cross validation for model training
