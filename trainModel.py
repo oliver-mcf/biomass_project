@@ -80,7 +80,6 @@ def test_model(x_test, y_test, folder, label, fold = None):
     constant = sm.add_constant(y_test)
     white_test = sm.stats.diagnostic.het_white(residuals, constant)
     stats_dict = {
-        'R': round(stats.pearsonr(y_test, y_pred)[0], 3),
         'R2': r2_score(y_test, y_pred),
         'Bias': np.sum(y_pred - y_test) / y_pred.shape[0],
         'MAE': np.mean(np.abs(y_test - y_pred)),
