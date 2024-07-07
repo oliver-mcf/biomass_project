@@ -44,7 +44,7 @@ def prepare_vars(pred_vars, ref_var, site):
     # Align flattened predictor variables
     pred_flat = np.stack(flat_dataset, axis = -1)
     print(pred_flat.shape)
-    return pred_flat
+    return pred_flat, common_nX, common_nY
 
 def predict_agb(pred_flat, batch, folder, model):
     # Configure batch process
@@ -74,13 +74,13 @@ def pred_hist(pred_data, bins, site, year, folder):
     plt.savefig(f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/predict/{site}_{year}_PREDICT_AGB_HIST.png', dpi = 300)
     plt.close()
 
-def pred_map(pred_data, ref_var, folder, site, year):
+def pred_map(pred_data, nX, nY, folder, site, year):
     '''Reshape Array of Predictions to Produce Map'''
     # Mask data for sensitivity
     pred_data[pred_data > 200] = 200
     # Visualise predicted biomass map
     plt.rcParams['font.family'] = 'Arial'
-    agb_map = np.reshape(pred_data, (ref_var.nY, ref_var.nX))
+    agb_map = np.reshape(pred_data, (nY, nX))
     plt.figure(figsize = (24, 20))
     plt.imshow(agb_map, cmap = 'Greens', vmin = 0, vmax = 200)    
     plt.title(f'Predicted Agboveground Biomass for {site}, 20{year}')
@@ -120,7 +120,7 @@ if __name__ == '__main__':
         ref_var = GeoTiff(one_var[0])
 
         # Prepare predictor variables
-        pred_flat = prepare_vars(pred_vars, ref_var, args.site)
+        pred_flat, nX, nY = prepare_vars(pred_vars, ref_var, args.site)
         print(pred_flat.shape)
 
         # Batch process model predictions
@@ -136,6 +136,6 @@ if __name__ == '__main__':
         pred_hist(pred_agb, args.bins, args.site, year, args.folder)
 
         # Visualise biomass prediction
-        pred_map(pred_agb, ref_var, args.folder, args.site, year)
+        pred_map(pred_agb, nX, nY, args.folder, args.site, year)
 
         # Save biomass map as geotiff
