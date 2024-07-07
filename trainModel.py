@@ -86,6 +86,7 @@ def test_model(x_test, y_test, folder, label, fold = None):
         'MAE%': np.mean(np.abs(y_test - y_pred)) / np.mean(y_test) * 100,
         'RMSE': sqrt(mean_squared_error(y_test, y_pred)),
         'RMSE%': sqrt(mean_squared_error(y_test, y_pred)) / np.mean(y_test) * 100,
+        'R': stats.pearsonr(y_test, y_pred)[0],
         'LM': white_test[0],
         'F': white_test[2],
         'P': white_test[1]}
