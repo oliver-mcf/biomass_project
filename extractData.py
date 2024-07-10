@@ -116,7 +116,7 @@ def export(array, labels, site, year):
     df_sorted = df_sorted.dropna()
     print(len(df_sorted))
     print(f"Successful export:", output)
- 
+
 
 # Code #############################################################################################################
 if __name__ == '__main__':
