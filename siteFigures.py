@@ -36,8 +36,9 @@ def plot_hist(data, bins, label, name):
     '''Plot Histogram from Array'''
     plt.rcParams['font.family'] = 'Arial'
     fig, ax = plt.subplots(figsize = (8,6))
+    data = data[data < 500]
     data_flat = data.flatten()
-    plt.hist(data_flat, bins = bins, color = 'lightgray', edgecolor = 'white')
+    plt.hist(data_flat, bins = bins, color = 'teal', edgecolor = 'white', alpha = 0.6)
     plt.ylabel('Frequency')
     plt.xlabel(f'{label}')
     plt.savefig(f'/home/s1949330/data/diss_data/figures/study_sites/{name}.png', dpi = 300)
@@ -86,6 +87,58 @@ def plot_lines(csv_file1, csv_file2, site, name):
     plt.savefig(f'/home/s1949330/data/diss_data/figures/study_sites/{name}.png', dpi=300)
     plt.close()
 
+def plot_density(tif, grid_size, name):
+    var = GeoTiff(tif)
+    # Create a boolean mask where values > 0
+    data = var.data
+    # Count the number of points in each cell
+    height = var.nY
+    width = var.nX  # Get the dimensions of the data
+    # Calculate the number of rows and columns in the density map
+    n_rows = (height + grid_size - 1) // grid_size
+    n_cols = (width + grid_size - 1) // grid_size
+    # Initialize the density map with zeros
+    density_map = np.zeros((n_rows, n_cols))
+    # Pad the data to ensure that the grid covers the entire area
+    padded_data = np.pad(data, ((0, grid_size - (height % grid_size if height % grid_size != 0 else grid_size)), 
+                               (0, grid_size - (width % grid_size if width % grid_size != 0 else grid_size))),
+                        mode='constant', constant_values=0)
+    # Iterate over the grid cells
+    for i in range(0, padded_data.shape[0], grid_size):
+        for j in range(0, padded_data.shape[1], grid_size):
+            # Extract the current grid cell
+            cell_data = padded_data[i:i+grid_size, j:j+grid_size]
+            # Count the number of points greater than 0 in the current grid cell
+            count = np.sum(cell_data > 0)
+            density_map[i // grid_size, j // grid_size] = count
+    # Plot the density map
+    plt.rcParams['font.family'] = 'Arial'
+    fig, ax = plt.subplots(figsize=(8, 6))
+    plt.imshow(density_map, cmap = 'pink', interpolation = 'nearest')
+    ax.set_xticks([])
+    ax.set_yticks([])
+    plt.colorbar(label = 'Count', shrink = 0.5)
+    plt.savefig(f'/home/s1949330/data/diss_data/figures/study_sites/{name}.png', dpi=300)
+    plt.close()
+
+def get_csv(tif_list, out_name):
+    col_names = [os.path.splitext(os.path.basename(tif))[0] for tif in tif_list]
+    flattened_data = []
+    for tif in tif_list:
+        var = GeoTiff(tif)  # Assuming GeoTiff is defined elsewhere
+        #data = var.data[var.data > 0]  # Extract data where values are > 0
+        data_flat = var.data.flatten()  # Flatten the 2D array into 1D
+        flattened_data.append(data_flat)
+    # Stack arrays as columns to get the shape (number of data points, number of TIFF files)
+    flattened_array = np.column_stack(flattened_data)
+    # Create DataFrame
+    df = pd.DataFrame(flattened_array, columns=col_names)
+    pprint(df.head())
+    df.to_csv(f'/home/s1949330/data/diss_data/figures/{out_name}.csv', index = False)
+    # Count the number of non-NaN and NaN values in each column
+    for col in df.columns:
+        count = df[col].notna().sum()
+        print(f"{col} = {count}")
 
 
 # Code #############################################################################################################
@@ -99,17 +152,25 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Read file
-    pred_var = f'/home/s1949330/data/diss_data/pred_vars/{args.site}/SRTM_Elevation.tif'
-    var = GeoTiff(pred_var)
+    #tif = f'/home/s1949330/data/diss_data/pred_vars/{args.site}/SRTM_Elevation.tif'
+    #var = GeoTiff(tif)
 
     # Plot histogram
-    plot_hist(var.data, 25, args.label, args.name)
+    #plot_hist(var.data, 25, args.label, args.name)
 
     # Plot bar chart
-    csv_file = '/home/s1949330/data/diss_data/figures/study_sites/annual_precip.csv'
-    plot_bar(csv_file, args.site, args.label, args.name)
+    #csv_file = '/home/s1949330/data/diss_data/figures/study_sites/annual_precip.csv'
+    #plot_bar(csv_file, args.site, args.label, args.name)
 
     # Plot line chart
-    csv_file1 = '/home/s1949330/data/diss_data/figures/study_sites/month_precip.csv'
-    csv_file2 = '/home/s1949330/data/diss_data/figures/study_sites/month_ndvi.csv'
-    plot_lines(csv_file1, csv_file2, args.site, args.name)
+    #csv_file1 = '/home/s1949330/data/diss_data/figures/study_sites/month_precip.csv'
+    #csv_file2 = '/home/s1949330/data/diss_data/figures/study_sites/month_ndvi.csv'
+    #plot_lines(csv_file1, csv_file2, args.site, args.name)
+
+    # Plot density map
+    #tif = f'/home/s1949330/data/diss_data/gedi/{args.site}/ALL_GEDI_AGB.tif'
+    #plot_density(tif, 20, args.name)
+
+    # Store tif data in csv
+    tif_list = glob(f'/home/s1949330/data/diss_data/gedi/{args.site}/2*_GEDI_AGB.tif')
+    get_csv(tif_list, args.name)
