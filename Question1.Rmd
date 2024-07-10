@@ -20,16 +20,16 @@ source("https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/f
 
 
 df_biomass <- read.csv("/home/s1949330/Documents/scratch/diss_data/gedi/gedi_data.csv")
-df <- df_biomass %>% filter(!is.na(AGB_Mean))
+df <- df_biomass %>% filter(!is.na(AGB_Mean) & Site %in% c("MGR", "TKW"))
 plot_biomass <- ggplot(df, aes(x = factor(Site), desc(AGB_Mean), y = AGB_Mean, fill = Site)) +
   geom_flat_violin(position = position_nudge(x = 0.2, y = 0), alpha = 0.8) +
   geom_point(aes(y = AGB_Mean, color = Site), position = position_jitter(width = 0.15), size = 1, alpha = 0.2) + 
   geom_boxplot(width = 0.2, outlier.shape = NA, alpha = 0.8) +
   scale_y_continuous(breaks = seq(0, max(df$AGB_Mean, na.rm = TRUE), by = 50)) +
-  labs(title = "GEDI Biomass Across Study Sites, 2019-2022", y = "\nBiomass (Mg/ha)", x = "\nSite") +
+  labs(title = "GEDI AGB Estimates in Study Sites, 2019-2022", y = "\nBiomass (Mg/ha)", x = "\nSite") +
   guides(fill = "none", color = "none") +
-  scale_fill_manual(values = c("#5A4A6F", "#9D5A6C",  "#EBB261", "#E47250", "#c33333")) +
-  scale_colour_manual(values = c("#5A4A6F", "#9D5A6C",  "#EBB261", "#E47250", "#c33333")) +
+  scale_fill_manual(values = c("#b22222", "#008000")) +
+  scale_colour_manual(values = c("#b22222", "#008000")) +
   coord_flip() +
   theme_classic() + 
   theme(panel.grid.major = element_line(color = "grey95"),
@@ -46,7 +46,7 @@ plot_sample <- ggplot(df_sample, aes(x = factor(Site), y = Coverage, fill = Site
   scale_y_continuous(limits = c(0, 10), breaks = seq(0, 10, by = 1)) +
   theme(panel.grid.major = element_line(color = "grey95"), legend.position = "none")
 
-print(plot_sample)
+#print(plot_sample)
 ```
 
 Fundamentally, AGB is not expected to change between seasonal/phenological cycles given that the largest proportion of AGB in DBT and GSW is held in the woody components of vegetation, and that held in foliage is seldom significant by comparison. Hence, evidence of seasonal variation in the L4A product found by Li et al (2023), suggests there is may be a balance between the spatial representativeness of input L4A training data and the temporal alignment or synchronicity with intended predictor variables i.e., the significance of L4A variation across seasons. Addressing this balance in the L4A data appropriately would reduce the risk of model overfitting subsequent uncertainty in spatially contiguous AGB estimates. To determine this balance the following research question is posed:
