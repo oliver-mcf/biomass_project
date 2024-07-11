@@ -129,7 +129,7 @@ if __name__ == '__main__':
     # Define calibration period
     year_list = ['20','21','22','23']
     for year in year_list:
-        print('Extracting data in: 20', year)
+        print(f'Extracting data in: 20{year}')
 
         # Read GEDI data
         input_var = f'/home/s1949330/data/diss_data/gedi/{args.site}/{year}_GEDI_AGB.tif'
