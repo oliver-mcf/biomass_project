@@ -124,28 +124,31 @@ if __name__ == '__main__':
     # Define command line arguments
     parser = argparse.ArgumentParser(description = "Extract data for a given site over given year(s).")
     parser.add_argument("--site", required = True, help = "Study site by SEOSAW abbreviation.")
-    parser.add_argument("--year", required = True, help = "End of austral year, give 20 for 2020.")
     args = parser.parse_args()
 
-    # Read GEDI data
-    input_var = f'/home/s1949330/data/diss_data/gedi/{args.site}/{args.year}_GEDI_AGB.tif'
-    gedi = GeoTiff(input_var)
+    # Define calibration period
+    year_list = ['20','21','22','23']
+    for year in year_list:
 
-    # Read predictor variables
-    vars = glob(f'/home/s1949330/data/diss_data/pred_vars/{args.site}/{args.year}_*.tif')
-    srtm_vars = glob(f'/home/s1949330/data/diss_data/pred_vars/{args.site}/SRTM_*.tif')
-    pred_vars = sorted(vars + srtm_vars)
+        # Read GEDI data
+        input_var = f'/home/s1949330/data/diss_data/gedi/{args.site}/{year}_GEDI_AGB.tif'
+        gedi = GeoTiff(input_var)
 
-    # Reproject all variables
-    var_list = [input_var] + pred_vars
-    reproject(var_list, epsg = '3857')
+        # Read predictor variables
+        vars = glob(f'/home/s1949330/data/diss_data/pred_vars/{args.site}/{year}_*.tif')
+        srtm_vars = glob(f'/home/s1949330/data/diss_data/pred_vars/{args.site}/SRTM_*.tif')
+        pred_vars = sorted(vars + srtm_vars)
 
-    # Resample predictor variables to GEDI resolution
-    gedi_res = get_res(input_var)
-    resample(pred_vars, gedi_res)
+        # Reproject all variables
+        var_list = [input_var] + pred_vars
+        reproject(var_list, epsg = '3857')
 
-    # Extract GEDI footprints and intersecting pixels
-    extracted_data = extract(gedi, pred_vars)
+        # Resample predictor variables to GEDI resolution
+        gedi_res = get_res(input_var)
+        resample(pred_vars, gedi_res)
 
-    # Export labelled variables to csv
-    export(extracted_data, pred_vars, args.site, args.year)
+        # Extract GEDI footprints and intersecting pixels
+        extracted_data = extract(gedi, pred_vars)
+
+        # Export labelled variables to csv
+        export(extracted_data, pred_vars, args.site, year)
