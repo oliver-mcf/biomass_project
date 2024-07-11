@@ -35,7 +35,7 @@ def decibels(dn):
     '''Calculate decibels from digital numbers'''
     return 10 * np.log10(dn ** 2) - 83.0    # Rosenqvist et al, 2007
 
-def convert(file):
+def convert_dB(file):
     '''Convert all palsar variables to decibels'''
     df = pd.read_csv(file)
     columns_to_correct = ['HH_Median', 'HH_StDev', 'HH_95', 'HH_05', 
@@ -46,6 +46,22 @@ def convert(file):
     df.to_csv(file, index = False)
     print(f'Successful conversion of PALSAR data from DN to dB')
 
+def geo_filter(input_csv, output_csv):
+    '''Filter for geolocation accuracy of input data'''
+    # Read csv
+    df = pd.read_csv(input_csv)
+    # Calculate absolute difference
+    df['GEDI-HV'] = abs(df['GEDI_AGB'] - df['HV_Median'])
+    # Mask differences less than 1 sigma
+    std_diff = df['GEDI-HV'].std()
+    df['Geolocated'] = (df['GEDI-HV'] < std_diff)
+    # Filter based on geolocation accuracy
+    filtered_df = df[df['Geolocated']]
+    print("Filter(B):", len(filtered_df))
+    # Save filtered dataframe
+    filtered_df = filtered_df.drop(columns = [ 'GEDI-HV', 'Geolocated'])
+    filtered_df.to_csv(output_csv, index = False)
+
 
 # Code #############################################################################################################
 if __name__ == '__main__':
@@ -54,15 +70,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = 'Combine CSV files for model training')
     parser.add_argument('--site', help = 'Site name to filter CSV files')
     args = parser.parse_args()
-    
-    # Identify all model input data
-    csv_list = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_init/*.csv')
 
+    # Identify filtered input data
+    csv_list = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_init/*.csv')
     if args.site:
         csv_list = [csv for csv in csv_list if os.path.basename(csv).startswith(args.site)]
-        output_csv = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/All_{args.site}_MODEL_INPUT_MERGE.csv'
+        merge_csv = f'/home/s1949330/data/diss_data/pred_vars/input_merge/All_{args.site}_MODEL_INPUT_MERGE.csv'
     else:
-        output_csv = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/All_MODEL_INPUT_MERGE.csv'
+        merge_csv = '/home/s1949330/data/diss_data/pred_vars/input_merge/All_MODEL_INPUT_MERGE.csv'
     
     fixed_columns = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB',
                      'SR_B2_Median', 'SR_B2_StDev', 'SR_B2_p95', 'SR_B2_p05', 
@@ -81,8 +96,11 @@ if __name__ == '__main__':
                      'HHHV_Ratio', 'HHHV_Index']
     
     # Align and export combined model input data
-    combine(csv_list, fixed_columns, output_csv)
+    combine(csv_list, fixed_columns, merge_csv)
 
     # Convert Palsar data to decibels
-    convert(output_csv)
+    convert_dB(merge_csv)
 
+    # Filter data by geolocation condition
+    output_csv = os.path.basename(merge_csv).replace('_MERGE.csv', '_GEO.csv')
+    geo_filter(merge_csv, output_csv)
