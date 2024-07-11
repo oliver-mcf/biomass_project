@@ -115,7 +115,7 @@ def export(array, labels, site, year):
     df_sorted.to_csv(output, index = False)
     df_sorted = df_sorted.dropna()
     print(len(df_sorted))
-    print(f"Successful export:", output)
+    print(f"Successful export: {output}\n")
 
 
 # Code #############################################################################################################
@@ -129,6 +129,7 @@ if __name__ == '__main__':
     # Define calibration period
     year_list = ['20','21','22','23']
     for year in year_list:
+        print('Extracting data in: 20', year)
 
         # Read GEDI data
         input_var = f'/home/s1949330/data/diss_data/gedi/{args.site}/{year}_GEDI_AGB.tif'
