@@ -111,7 +111,7 @@ def export(array, labels, site, year):
     df_sorted = df.sort_values(by = 'GEDI_AGB').reset_index(drop = True)
     print(df_sorted.head())
     print(df_sorted.shape)
-    output = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_init/{site}_{year}_INPUT_DATA.csv'
+    output = f'/home/s1949330/data/diss_data/pred_vars/input_init/{site}_{year}_INPUT_DATA.csv'
     df_sorted.to_csv(output, index = False)
     df_sorted = df_sorted.dropna()
     print(len(df_sorted))
@@ -124,16 +124,16 @@ if __name__ == '__main__':
     # Define command line arguments
     parser = argparse.ArgumentParser(description = "Extract data for a given site over given year(s).")
     parser.add_argument("--site", required = True, help = "Study site by SEOSAW abbreviation.")
-    parser.add_argument("--year", required = True, help = "End of austral year, eg: for Aug 2019 to July 2020, give 20 for 2020.")
+    parser.add_argument("--year", required = True, help = "End of austral year, give 20 for 2020.")
     args = parser.parse_args()
 
     # Read GEDI data
-    input_var = f'/home/s1949330/Documents/scratch/diss_data/gedi/{args.site}/{args.year}_GEDI_AGB.tif'
+    input_var = f'/home/s1949330/data/diss_data/gedi/{args.site}/{args.year}_GEDI_AGB.tif'
     gedi = GeoTiff(input_var)
 
     # Read predictor variables
-    vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/{args.year}_*.tif')
-    srtm_vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/SRTM_*.tif')
+    vars = glob(f'/home/s1949330/data/diss_data/pred_vars/{args.site}/{args.year}_*.tif')
+    srtm_vars = glob(f'/home/s1949330/data/diss_data/pred_vars/{args.site}/SRTM_*.tif')
     pred_vars = sorted(vars + srtm_vars)
 
     # Reproject all variables
