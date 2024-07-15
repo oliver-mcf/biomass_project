@@ -62,7 +62,7 @@ def reduce(ref_csv, csv_list, output_dir):
         filtered_df = df[common_columns]
         filtered_df = filtered_df[ref_columns]
         # Write newly filtered site input data to csv
-        filename = os.path.basename(csv_file).replace('_MERGE.csv', '_FINAL.csv')
+        filename = os.path.basename(csv_file).replace('_GEO.csv', '_GEO_FINAL.csv')
         output_path = os.path.join(output_dir, filename)
         filtered_df.to_csv(output_path, index = False)
         print(f"Site filtered data saved to: {output_path}")
@@ -83,18 +83,18 @@ if __name__ == '__main__':
     if args.filter:
         
         # Isolate variables by group/label given
-        csv_file = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/All_MODEL_INPUT_MERGE.csv'
+        csv_file = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/All_MODEL_INPUT_GEO.csv'
         df = isolate_data(csv_file, args.label, filter = True)
 
         # Perform correlation matrix and remove pairs above threshold
-        output_csv = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/{args.label}_MODEL_INPUT_FINAL.csv'
+        output_csv = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/{args.label}_MODEL_INPUT_GEO_FINAL.csv'
         output_dir = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/'
         matrix(df, args.label, args.coef, output_dir, output_csv)
         
     # Reduce site data to match filtered predictor variables
     if args.reduce:
-        csv_list = ['/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/All_MGR_MODEL_INPUT_MERGE.csv', 
-                    '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/All_TKW_MODEL_INPUT_MERGE.csv']
-        ref_csv = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_MODEL_INPUT_FINAL.csv'
+        csv_list = ['/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/All_MGR_MODEL_INPUT_GEO.csv', 
+                    '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_merge/All_TKW_MODEL_INPUT_GEO.csv']
+        ref_csv = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_MODEL_INPUT_GEO_FINAL.csv'
         output_dir = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/'
         reduce(ref_csv, csv_list, output_dir)
