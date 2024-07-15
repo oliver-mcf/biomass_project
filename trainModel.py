@@ -116,7 +116,7 @@ def variable_importance(folder, label, var_names, fold = None):
             scaled_importance = importances[idx] * 100
             writer.writerow([var_names[idx], scaled_importance])
 
-def model_scatter(y_test, y_pred, folder, label, model, single_output = False):
+def model_scatter(y_test, y_pred, folder, label, model):
     '''Plot Scatter of Observed and Predicted Values'''
     plt.rcParams['font.family'] = 'Arial'
     fig, ax = plt.subplots(figsize = (12, 10))
@@ -133,11 +133,11 @@ def model_scatter(y_test, y_pred, folder, label, model, single_output = False):
     ax.set_xlabel('Observed AGB (Mg/ha)')
     ax.set_ylabel('Predicted AGB (Mg/ha)')
     ax.set_title(f'{label} Model - Observed vs Predicted')
-    fig_name = f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_MODEL_SCATTER.png' if single_output else f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_MODEL_SCATTER_FOLD{model + 1}.png'
+    fig_name = f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_MODEL_SCATTER_FOLD{model + 1}.png'
     plt.savefig(fig_name, dpi = 300)
     plt.close(fig)
 
-def model_hist(y_test, y_pred, folder, label, model, single_output = False):
+def model_hist(y_test, y_pred, folder, label, model):
     '''Plot Histogram of Observed and Predicted Values'''
     plt.rcParams['font.family'] = 'Arial'
     fig, ax = plt.subplots(figsize = (12, 10))
@@ -155,7 +155,7 @@ def model_hist(y_test, y_pred, folder, label, model, single_output = False):
     ax.set_xlabel('Observed AGB (Mg/ha)')
     ax.set_ylabel('Predicted AGB (Mg/ha)')
     ax.set_title(f'{label} Model - Observed vs Predicted')
-    fig_name = f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_MODEL_HIST.png' if single_output else f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_MODEL_HIST_FOLD{model + 1}.png'
+    fig_name = f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_MODEL_HIST_FOLD{model + 1}.png'
     plt.savefig(fig_name, dpi = 300)
     plt.close(fig)
 
