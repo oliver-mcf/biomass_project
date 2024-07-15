@@ -102,5 +102,5 @@ if __name__ == '__main__':
     convert_dB(merge_csv)
 
     # Filter data by geolocation condition
-    output_csv = os.path.basename(merge_csv).replace('_MERGE.csv', '_GEO.csv')
+    output_csv = merge_csv.replace('_MERGE.csv', '_GEO.csv')
     geo_filter(merge_csv, output_csv)
