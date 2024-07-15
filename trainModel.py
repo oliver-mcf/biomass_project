@@ -80,7 +80,9 @@ def test_model(x_test, y_test, folder, label, fold = None):
     constant = sm.add_constant(y_test)
     white_test = sm.stats.diagnostic.het_white(residuals, constant)
     stats_dict = {
-        'R2': r2_score(y_test, y_pred),
+        'R2 (r2_score)': r2_score(y_test, y_pred),
+        'R2 (rf.score)': rf.score(x_test, y_test),
+        'R2 (explained_variance_score)': explained_variance_score(y_test, y_pred),
         'Bias': np.sum(y_pred - y_test) / y_pred.shape[0],
         'MAE': np.mean(np.abs(y_test - y_pred)),
         'MAE%': np.mean(np.abs(y_test - y_pred)) / np.mean(y_test) * 100,
@@ -148,7 +150,7 @@ def model_hist(y_test, y_pred, folder, label, model, single_output = False):
     y_pred = y_pred[mask]
     plt.rcParams['font.family'] = 'Arial'
     fig, ax = plt.subplots(figsize = (14, 12))
-    plt.hist2d(y_test, y_pred, bins = (100,100), cmap = 'turbo', cmin = 5)
+    plt.hist2d(y_test, y_pred, bins = (100,100), cmap = 'turbo', cmin = 1)
     plt.colorbar(shrink = 0.75)
     ax.plot([0,300], [0,300], ls = 'solid', color = 'k')
     # Plot line of best fit
