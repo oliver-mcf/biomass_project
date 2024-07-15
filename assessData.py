@@ -23,5 +23,5 @@ if __name__ == '__main__':
     parser.add_argument('--file', help = 'Filename of csv with directory, to return n footprints by unique value (site_year)')
     args = parser.parse_args()
     
-    #file = '/home/s1949330/data/diss_data/pred_vars/input_merge/All_MODEL_INPUT_GEO.csv'
+    #file = '/home/s1949330/data/diss_data/pred_vars/input_final/All_MODEL_INPUT_GEO_FINAL.csv'
     sample_year(args.file)
