@@ -18,27 +18,35 @@ def var_regress(file):
     '''Perform linear regression with target and predictor variables'''
     # Read file
     df = pd.read_csv(file)
-    df = df.drop.na()
+    df = df.dropna()
     # Set target variable
     y = df['GEDI_AGB']
     # Drop columns not required
     df = df.drop(columns = ['GEDI_X', 'GEDI_Y', 'Source'])
     # Isolate predictor variables
     pred_vars = df.drop(columns = ['GEDI_AGB'])
-    results = {}
-    # Perform linear regression
+    # Prepare a dictionary to hold regression results
+    results = {
+        'Variable': [],
+        'Coefficient': [],
+        'Intercept': [],
+        'R2 Score': []}
+    # Perform linear regression for each predictor variable
     for var in pred_vars.columns:
         X_column = pred_vars[[var]]
         model = LinearRegression()
         model.fit(X_column, y)
         y_pred = model.predict(X_column)
-        # Calculate regression statistics
         r2 = r2_score(y, y_pred)
-        results[var] = {
-            'coef': model.coef_[0],
-            'intercept': model.intercept_,
-            'r2_score': r2}
-    print(results)
+        results['Variable'].append(var)
+        results['Coefficient'].append(model.coef_[0])
+        results['Intercept'].append(model.intercept_)
+        results['R2 Score'].append(r2)
+    # Convert results dictionary to a DataFrame
+    results_df = pd.DataFrame(results)
+    output_csv = '/home/s1949330/data/diss_data/pred_vars/input_final/ALL_LINEAR_REGRESSION.csv'
+    results_df.to_csv(output_csv, index = False)
+    print(f'SUCCESS: Regression results saved to {output_csv}')
 
 
 
@@ -59,4 +67,3 @@ if __name__ == '__main__':
 
     if args.regress:
         var_regress(args.file)
-        
