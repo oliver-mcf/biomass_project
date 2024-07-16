@@ -47,7 +47,7 @@ def var_regress(file, geo):
     if geo:
         output_csv = f'/home/s1949330/data/diss_data/pred_vars/input_final/All_LINEAR_REGRESSION_{geo}.csv'
     else:
-        output_csv = '/home/s1949330/data/diss_data/pred_vars/input_final/ALL_LINEAR_REGRESSION.csv'
+        output_csv = '/home/s1949330/data/diss_data/pred_vars/input_final/All_LINEAR_REGRESSION.csv'
     results_df.to_csv(output_csv, index = False)
     print(f'SUCCESS: Regression results saved to {output_csv}')
 
