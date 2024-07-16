@@ -84,7 +84,7 @@ if __name__ == '__main__':
     
     # Define command line arguments
     parser = argparse.ArgumentParser(description = 'Combine CSV files for model training')
-    parser.add_argument('--site', required = True, help = 'Site name to filter CSV files')
+    parser.add_argument('--site', help = 'Site name to filter CSV files')
     parser.add_argument('--geo', help = 'End of folder name for either "PALSAR" or "COVER" geolocation filter')
     args = parser.parse_args()
 
