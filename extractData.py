@@ -136,9 +136,10 @@ if __name__ == '__main__':
         gedi = GeoTiff(input_var)
 
         # Read predictor variables
+        cover_var = glob(f'/home/s1949330/data/diss_data/gedi/{args.site}/{year}_GEDI_COVER.tif')
         vars = glob(f'/home/s1949330/data/diss_data/pred_vars/{args.site}/{year}_*.tif')
         srtm_vars = glob(f'/home/s1949330/data/diss_data/pred_vars/{args.site}/SRTM_*.tif')
-        pred_vars = sorted(vars + srtm_vars)
+        pred_vars = sorted(cover_var + vars + srtm_vars)
 
         # Reproject all variables
         var_list = [input_var] + pred_vars
