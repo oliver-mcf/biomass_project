@@ -38,12 +38,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = 'Assess Random Forest Model Performance by Number of Trees')
     parser.add_argument('--label', type = str, choices = ['Landsat', 'Sentinel', 'Palsar', 'All'], required = True, help = 'Keyword for selecting predictor variables')
     parser.add_argument('--test', action = 'store_true', help = 'Adopt a smaller sample size of the available training data for testing')
-    parser.add_argument('--subset', type = float, default = 0.10, help = 'Proportion of original dataset kept for testing, 0-1')
+    parser.add_argument('--subset', type = float, default = 0.50, help = 'Proportion of original dataset kept for testing, 0-1')
     parser.add_argument('--split', type = float, default = 0.3, help = 'Ratio for splitting the data into training and testing sets')
     args = parser.parse_args()
 
     # Isolate target and predictor variables
-    input_filename = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_MODEL_INPUT_FINAL.csv'
+    input_filename = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_EXTRACT_FINAL.csv'
     y, x, _ = isolate_data(input_filename, args.label)
 
     # Generate random subset of training data
