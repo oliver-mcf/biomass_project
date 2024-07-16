@@ -9,21 +9,21 @@ from libraries import *
 # Objects & Methods ################################################################################################
 def sample_year(file):       
     df = pd.read_csv(file)
+    print(len(df))
     df = df.dropna()
+    print(len(df))
     source_counts = df['Source'].value_counts()
-    for source, count in source_counts.items():
+    for source, count in sorted(source_counts.items()):
         print(f"{source}: {count}")
 
-def var_regress(file):
+def var_regress(file, geo):
     '''Perform linear regression with target and predictor variables'''
     # Read file
     df = pd.read_csv(file)
-    df = df.dropna()
-    # Set target variable
-    y = df['GEDI_AGB']
-    # Drop columns not required
     df = df.drop(columns = ['GEDI_X', 'GEDI_Y', 'Source'])
-    # Isolate predictor variables
+    df = df.dropna()
+    # Isolate target and predictor variables
+    y = df['GEDI_AGB']    
     pred_vars = df.drop(columns = ['GEDI_AGB'])
     # Prepare a dictionary to hold regression results
     results = {
@@ -44,7 +44,10 @@ def var_regress(file):
         results['R2 Score'].append(r2)
     # Convert results dictionary to a DataFrame
     results_df = pd.DataFrame(results)
-    output_csv = '/home/s1949330/data/diss_data/pred_vars/input_final/ALL_LINEAR_REGRESSION.csv'
+    if geo:
+        output_csv = f'/home/s1949330/data/diss_data/pred_vars/input_final/All_LINEAR_REGRESSION_{geo}.csv'
+    else:
+        output_csv = '/home/s1949330/data/diss_data/pred_vars/input_final/ALL_LINEAR_REGRESSION.csv'
     results_df.to_csv(output_csv, index = False)
     print(f'SUCCESS: Regression results saved to {output_csv}')
 
@@ -58,6 +61,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = 'Assess data stored in csv for filtered training data')
     parser.add_argument('--count', action = 'store_true', help = 'Boolean to count footprints/intersects in file')
     parser.add_argument('--file', help = 'Filename of csv with directory, to return n footprints by unique value (site_year)')
+    parser.add_argument('--geo', help = 'Geolocation filter condition, PALSAR or COVER')
     parser.add_argument('--regress', action = 'store_true', help = 'Instruction to perform linear regression with predictor variables')
     args = parser.parse_args()
     
@@ -66,4 +70,4 @@ if __name__ == '__main__':
         sample_year(args.file)
 
     if args.regress:
-        var_regress(args.file)
+        var_regress(args.file, args.geo)
