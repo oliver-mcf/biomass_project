@@ -46,20 +46,36 @@ def convert_dB(file):
     df.to_csv(file, index = False)
     print(f'Successful conversion of PALSAR data from DN to dB')
 
-def geo_filter(input_csv, output_csv):
-    '''Filter for geolocation accuracy of input data'''
+def geo_palsar(input_csv, output_csv):
+    '''Geolocation alignment with PALSAR'''
     # Read csv
     df = pd.read_csv(input_csv)
     # Calculate absolute difference
-    df['GEDI-HV'] = abs(df['GEDI_AGB'] - df['HV_Median'])
+    df['AGB-HV'] = abs(df['GEDI_AGB'] - df['HV_Median'])
     # Mask differences less than 1 sigma
-    std_diff = df['GEDI-HV'].std()
-    df['Geolocated'] = (df['GEDI-HV'] < std_diff)
+    std_diff = df['AGB-HV'].std()
+    df['Geolocated'] = (df['AGB-HV'] < std_diff)
     # Filter based on geolocation accuracy
     filtered_df = df[df['Geolocated']]
     print("Filter(B):", len(filtered_df))
     # Save filtered dataframe
-    filtered_df = filtered_df.drop(columns = [ 'GEDI-HV', 'Geolocated'])
+    filtered_df = filtered_df.drop(columns = ['AGB-HV', 'Geolocated'])
+    filtered_df.to_csv(output_csv, index = False)
+
+def geo_cover(input_csv, output_csv):
+    '''Geolocation alignment with GEDI Cover'''
+    # Read csv
+    df = pd.read_csv(input_csv)
+    # Calculate absolute difference
+    df['COVER-NDVI'] = abs(df['GEDI_COVER'] - df['YR_NDVI_Median'])
+    # Mask differences less than 1 sigma
+    std_diff = df['COVER-NDVI'].std()
+    df['Geolocated'] = (df['COVER-NDVI'] < std_diff)
+    # Filter based on geolocation accuracy
+    filtered_df = df[df['Geolocated']]
+    print("Filter(C):", len(filtered_df))
+    # Save filtered dataframe
+    filtered_df = filtered_df.drop(columns = ['COVER-NDVI', 'Geolocated'])
     filtered_df.to_csv(output_csv, index = False)
 
 
@@ -69,24 +85,21 @@ if __name__ == '__main__':
     # Define command line arguments
     parser = argparse.ArgumentParser(description = 'Combine CSV files for model training')
     parser.add_argument('--site', help = 'Site name to filter CSV files')
+    parser.add_argument('--geo', help = 'End of folder name for either "palsar" or "cover" geolocation filter')
     args = parser.parse_args()
 
     # Identify filtered input data
     csv_list = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_init/*.csv')
-    if args.site:
-        csv_list = [csv for csv in csv_list if os.path.basename(csv).startswith(args.site)]
-        merge_csv = f'/home/s1949330/data/diss_data/pred_vars/input_merge/All_{args.site}_MODEL_INPUT_MERGE.csv'
-    else:
-        merge_csv = '/home/s1949330/data/diss_data/pred_vars/input_merge/All_MODEL_INPUT_MERGE.csv'
     
-    fixed_columns = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB',
+    # Define variable names
+    fixed_columns = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB', 'GEDI_COVER',
                      'SR_B2_Median', 'SR_B2_StDev', 'SR_B2_p95', 'SR_B2_p05', 
                      'SR_B3_Median', 'SR_B3_StDev', 'SR_B3_p95', 'SR_B3_p05',
                      'SR_B4_Median', 'SR_B4_StDev', 'SR_B4_p95', 'SR_B4_p05',
                      'SR_B5_Median', 'SR_B5_StDev', 'SR_B5_p95', 'SR_B5_p05',
                      'SR_B6_Median', 'SR_B6_StDev', 'SR_B6_p95', 'SR_B6_p05',
                      'SR_B7_Median', 'SR_B7_StDev', 'SR_B7_p95', 'SR_B7_p05',
-                     'T1_NDVI_Median', 'T2_NDVI_Median', 'T3_NDVI_Median',
+                     'YR_NDVI_Median', 'T1_NDVI_Median', 'T2_NDVI_Median', 'T3_NDVI_Median',
                      'NDVI_Wet95', 'NDVI_Wet05', 'NDVI_Dry95', 'NDVI_Dry05', 'NDVI_Gradient',
                      'SRTM_Elevation', 'SRTM_Slope', 'SRTM_mTPI',
                      'VV_Median', 'VV_StDev', 'VV_95', 'VV_05',
@@ -95,6 +108,13 @@ if __name__ == '__main__':
                      'HV_Median', 'HV_StDev', 'HV_95', 'HV_05',
                      'HHHV_Ratio', 'HHHV_Index']
     
+    # Output file with site condition
+    if args.site:
+        csv_list = [csv for csv in csv_list if os.path.basename(csv).startswith(args.site)]
+        merge_csv = f'/home/s1949330/data/diss_data/pred_vars/input_merge_{args.geo}/All_{args.site}_EXTRACT_MERGE.csv'
+    else:
+        merge_csv = f'/home/s1949330/data/diss_data/pred_vars/input_merge_{args.geo}/All_EXTRACT_MERGE.csv'
+    
     # Align and export combined model input data
     combine(csv_list, fixed_columns, merge_csv)
 
@@ -102,5 +122,8 @@ if __name__ == '__main__':
     convert_dB(merge_csv)
 
     # Filter data by geolocation condition
-    output_csv = merge_csv.replace('_MERGE.csv', '_GEO.csv')
-    geo_filter(merge_csv, output_csv)
+    output_csv = merge_csv.replace('_MERGE.csv', f'_MERGE_{args.geo}.csv')
+    if args.geo == 'PALSAR':
+        geo_palsar(merge_csv, output_csv)
+    elif args.geo == 'COVER':
+        geo_cover(merge_csv, output_csv)
