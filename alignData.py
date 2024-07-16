@@ -111,9 +111,9 @@ if __name__ == '__main__':
     # Output file with site condition
     if args.site:
         csv_list = [csv for csv in csv_list if os.path.basename(csv).startswith(args.site)]
-        merge_csv = f'/home/s1949330/data/diss_data/pred_vars/input_merge_{args.geo}/All_{args.site}_EXTRACT_MERGE.csv'
+        merge_csv = f'/home/s1949330/data/diss_data/pred_vars/input_merge/All_{args.site}_EXTRACT_MERGE.csv'
     else:
-        merge_csv = f'/home/s1949330/data/diss_data/pred_vars/input_merge_{args.geo}/All_EXTRACT_MERGE.csv'
+        merge_csv = f'/home/s1949330/data/diss_data/pred_vars/input_merge/All_EXTRACT_MERGE.csv'
     
     # Align and export combined model input data
     combine(csv_list, fixed_columns, merge_csv)
