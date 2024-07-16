@@ -8,7 +8,7 @@ from libraries import *
 # Objects & Methods ################################################################################################
 from trainModel import isolate_data
 
-def matrix(df, label, geo, coef, output_dir, output_csv):
+def matrix(df, geo, coef, output_dir, output_csv):
     '''Create correlation matrix for predictor variables and filter highly correlated ones.'''
     # Compute the correlation matrix allowing for various procesisng stages
     df = df.drop(columns = ['GEDI_COVER'])
@@ -17,18 +17,15 @@ def matrix(df, label, geo, coef, output_dir, output_csv):
     correlation_matrix = df[predictor_columns].corr()
     # Plot and save the correlation matrix heatmap
     plt.rcParams['font.family'] = 'Arial'
-    if label == 'All':
-        plt.figure(figsize = (24, 20))
-    elif label in ['Landsat', 'Sentinel', 'Palsar']:
-        plt.figure(figsize = (12, 10))
+    plt.figure(figsize = (24, 20))
     sns.heatmap(correlation_matrix, annot = True, fmt = ".1f", cmap = 'coolwarm', square = True,
                 cbar_kws = {"shrink": .5}, mask = np.eye(len(correlation_matrix), dtype = bool),
                 vmin = -1, vmax = 1)
     plt.title('Predictor Variable Correlation Matrix')
     if geo:
-        output_fig = f'{output_dir}{label}_CORRELATION_MATRIX_{geo}.png'
+        output_fig = f'{output_dir}All_CORRELATION_MATRIX_{geo}.png'
     else:   
-        output_fig = f'{output_dir}{label}_CORRELATION_MATRIX.png'
+        output_fig = f'{output_dir}All_CORRELATION_MATRIX.png'
     plt.savefig(output_fig, dpi = 300)
     plt.close()
     # Identify and remove highly correlated variables
@@ -45,9 +42,9 @@ def matrix(df, label, geo, coef, output_dir, output_csv):
     pprint(variables_to_keep)
     # Save lists of removed and retained variables to a CSV file
     if geo:
-        variable_csv = f'{output_dir}{label}_FILTERED_VARIABLES_{geo}.csv'
+        variable_csv = f'{output_dir}All_FILTERED_VARIABLES_{geo}.csv'
     else:
-        variable_csv = f'{output_dir}{label}_FILTERED_VARIABLES.csv'
+        variable_csv = f'{output_dir}All_FILTERED_VARIABLES.csv'
     with open(variable_csv, mode = 'w', newline = '') as file:
         writer = csv.writer(file)
         writer.writerow(['Retained', 'Removed'])
@@ -85,7 +82,6 @@ if __name__ == '__main__':
 
     # Define command line arguments
     parser = argparse.ArgumentParser(description = 'Filtering Predictor Variables for Model Input')
-    parser.add_argument('--label', help = 'Predictor label (e.g., Landsat, Sentinel, Palsar, All)')
     parser.add_argument('--filter', action = 'store_true', help = 'Filter predictor variables of main model input csv')
     parser.add_argument('--geo', help = 'Geolocation filter, PALSAR or COVER')
     parser.add_argument('--coef', type = float, help = 'Correlation coefficient threshold for filtering predictor variables')
@@ -98,15 +94,15 @@ if __name__ == '__main__':
         # Isolate variables by group/label given
         if args.geo:
             csv_file = f'/home/s1949330/data/diss_data/pred_vars/input_merge/All_EXTRACT_MERGE_{args.geo}.csv'
-            output_csv = f'/home/s1949330/data/diss_data/pred_vars/input_final/{args.label}_EXTRACT_FINAL_{args.geo}.csv'
+            output_csv = f'/home/s1949330/data/diss_data/pred_vars/input_final/All_EXTRACT_FINAL_{args.geo}.csv'
         else: 
             csv_file = '/home/s1949330/data/diss_data/pred_vars/input_merge/All_EXTRACT_MERGE.csv'
-            output_csv = f'/home/s1949330/data/diss_data/pred_vars/input_final/{args.label}_EXTRACT_FINAL.csv'
+            output_csv = f'/home/s1949330/data/diss_data/pred_vars/input_final/All_EXTRACT_FINAL.csv'
         df = isolate_data(csv_file, args.label, filter = True)
 
         # Perform correlation matrix and remove pairs above threshold
         output_dir = f'/home/s1949330/data/diss_data/pred_vars/input_final/'
-        matrix(df, args.label, args.geo, args.coef, output_dir, output_csv)
+        matrix(df, args.geo, args.coef, output_dir, output_csv)
         
     # Reduce site data to match filtered predictor variables
     if args.reduce:
