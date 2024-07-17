@@ -19,7 +19,7 @@ def isolate_data(filename, label, filter = False):
     coords = df[['GEDI_X', 'GEDI_Y']]
     # Set conditions for predictor variable inclusion
     if label == "Landsat":
-        landsat_cols = [col for col in df.columns if col.startswith(('SRTM', 'SR', 'T'))]
+        landsat_cols = [col for col in df.columns if col.startswith(('SRTM', 'SR', 'YR', 'T', 'NDVI'))]
         x = df.loc[:, landsat_cols]
     elif label == "Sentinel":
         sentinel_cols = [col for col in df.columns if col.startswith(('SRTM', 'VV', 'VH'))]
@@ -116,20 +116,31 @@ def variable_importance(folder, label, var_names, fold = None):
             scaled_importance = importances[idx] * 100
             writer.writerow([var_names[idx], scaled_importance])
 
-def model_scatter(y_test, y_pred, folder, label, model):
+def model_scatter(y_test, y_pred, folder, label, model, site):
     '''Plot Scatter of Observed and Predicted Values'''
+    # Constrain values to model sensitivity
+    mask = (y_test < 300) & (y_pred < 300)
+    y_test = y_test[mask]
+    y_pred = y_pred[mask]
+    # Plot scatter
     plt.rcParams['font.family'] = 'Arial'
     fig, ax = plt.subplots(figsize = (12, 10))
-    ax.scatter(y_test, y_pred, color = 'lightsteelblue', alpha = 0.4, edgecolor = 'steelblue')
-    ax.plot([0, 100], [0, 100], ls = 'solid', color = 'k')
+    ax.scatter(y_test, y_pred, marker = '.', color = 'steelblue')
+    if site:
+        upper = 100
+        step = 5
+    else:
+        upper = 300
+        step = 10
+    ax.plot([0, upper], [0, upper], ls = 'solid', color = 'k')
     # Plot line of best fit
     slope, intercept = np.polyfit(y_test, y_pred, 1)
     best_fit = slope * np.array(y_test) + intercept
     ax.plot(y_test, best_fit, ls = 'solid', color = 'red', label = 'Linear')
-    ax.set_xlim([0, 100])
-    ax.set_ylim([0, 100])
-    ax.set_xticks(np.arange(0, 110, 10))
-    ax.set_yticks(np.arange(0, 110, 10))
+    ax.set_xlim([0, upper])
+    ax.set_ylim([0, upper])
+    ax.set_xticks(np.arange(0, upper + step, step))
+    ax.set_yticks(np.arange(0, upper + step, step))
     ax.set_xlabel('Observed AGB (Mg/ha)')
     ax.set_ylabel('Predicted AGB (Mg/ha)')
     ax.set_title(f'{label} Model - Observed vs Predicted')
@@ -137,21 +148,36 @@ def model_scatter(y_test, y_pred, folder, label, model):
     plt.savefig(fig_name, dpi = 300)
     plt.close(fig)
 
-def model_hist(y_test, y_pred, folder, label, model):
+def model_hist(y_test, y_pred, folder, label, model, site):
     '''Plot Histogram of Observed and Predicted Values'''
+    # Constrain values to model sensitivity
+    mask = (y_test < 300) & (y_pred < 300)
+    y_test = y_test[mask]
+    y_pred = y_pred[mask]
+    # Plot histogram
     plt.rcParams['font.family'] = 'Arial'
     fig, ax = plt.subplots(figsize = (12, 10))
-    plt.hist2d(y_test, y_pred, bins = (25,25), cmap = 'Purples', cmin = 1)
-    plt.colorbar(shrink = 0.75)
-    ax.plot([0,100], [0,100], ls = 'solid', color = 'k')
+    if site:
+        bins = 25
+        upper = 100
+        step = 5
+    
+    else:
+        bins = 50
+        upper = 300
+        step = 10
+    hist = plt.hist2d(y_test, y_pred, bins = (bins,bins), cmap = 'viridis', cmin = 1)
+    #plt.colorbar(shrink = 0.75)
+    cbar = plt.colorbar(hist[3], shrink = 0.5, ticks = np.arange(0, 100, step))
+    ax.plot([0,upper], [0,upper], ls = 'solid', color = 'k')
     # Plot line of best fit
     slope, intercept = np.polyfit(y_test, y_pred, 1)
     best_fit = slope * np.array(y_test) + intercept
     ax.plot(y_test, best_fit, ls = 'solid', color = 'red', label = 'Linear')
-    ax.set_xlim([0, 100])
-    ax.set_ylim([0, 100])
-    ax.set_xticks(np.arange(0, 110, 10))
-    ax.set_yticks(np.arange(0, 110, 10))
+    ax.set_xlim([0, upper])
+    ax.set_ylim([0, upper])
+    ax.set_xticks(np.arange(0, upper + step, step))
+    ax.set_yticks(np.arange(0, upper + step, step))
     ax.set_xlabel('Observed AGB (Mg/ha)')
     ax.set_ylabel('Predicted AGB (Mg/ha)')
     ax.set_title(f'{label} Model - Observed vs Predicted')
@@ -208,9 +234,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Isolate target and filtered predictor variables
-    input_filename = (f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/{args.label}_{args.site}_MODEL_INPUT_GEO_FINAL.csv'
+    input_filename = (f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_{args.site}_EXTRACT_FINAL_PALSAR.csv'
                       if args.site else 
-                      f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/{args.label}_MODEL_INPUT_GEO_FINAL.csv')
+                      f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_EXTRACT_FINAL_PALSAR.csv')
     y, x, coords = isolate_data(input_filename, args.label)
 
     # Perform k-fold cross validation for model training
