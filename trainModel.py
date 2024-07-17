@@ -116,7 +116,7 @@ def variable_importance(folder, label, var_names, fold = None):
             scaled_importance = importances[idx] * 100
             writer.writerow([var_names[idx], scaled_importance])
 
-def model_scatter(y_test, y_pred, folder, label, model, site):
+def model_scatter(y_test, y_pred, folder, label, model, geo):
     '''Plot Scatter of Observed and Predicted Values'''
     # Constrain values to model sensitivity
     mask = (y_test < 300) & (y_pred < 300)
@@ -126,7 +126,10 @@ def model_scatter(y_test, y_pred, folder, label, model, site):
     plt.rcParams['font.family'] = 'Arial'
     fig, ax = plt.subplots(figsize = (12, 10))
     ax.scatter(y_test, y_pred, marker = '.', color = 'steelblue')
-    if site:
+    if geo == 'PALSAR':
+        upper = 100
+        step = 5
+    elif geo == 'COVER':
         upper = 150
         step = 5
     else:
@@ -148,7 +151,7 @@ def model_scatter(y_test, y_pred, folder, label, model, site):
     plt.savefig(fig_name, dpi = 300)
     plt.close(fig)
 
-def model_hist(y_test, y_pred, folder, label, model, site):
+def model_hist(y_test, y_pred, folder, label, model, geo):
     '''Plot Histogram of Observed and Predicted Values'''
     # Constrain values to model sensitivity
     mask = (y_test < 300) & (y_pred < 300)
@@ -157,19 +160,21 @@ def model_hist(y_test, y_pred, folder, label, model, site):
     # Plot histogram
     plt.rcParams['font.family'] = 'Arial'
     fig, ax = plt.subplots(figsize = (12, 10))
-    if site:
+    if geo == 'PALSAR':
+        bins = 25
+        upper = 100
+        step = 5
+    elif geo == 'COVER':
         bins = 25
         upper = 150
         step = 5
-        # geo_palsar removes higher values, few greater than 60 [manual "upper" to 100]
-        # geo_cover keeps some higher values greater than 100 [manual "upper" to 150]
     else:
         bins = 50
         upper = 300
         step = 10
     hist = plt.hist2d(y_test, y_pred, bins = (bins,bins), cmap = 'viridis', cmin = 1)
     #plt.colorbar(shrink = 0.75)
-    cbar = plt.colorbar(hist[3], shrink = 0.5, ticks = np.arange(0, 100, step))
+    cbar = plt.colorbar(hist[3], shrink = 0.5, ticks = np.arange(0, 300, step))
     ax.plot([0,upper], [0,upper], ls = 'solid', color = 'k')
     # Plot line of best fit
     slope, intercept = np.polyfit(y_test, y_pred, 1)
@@ -186,7 +191,7 @@ def model_hist(y_test, y_pred, folder, label, model, site):
     plt.savefig(fig_name, dpi = 300)
     plt.close(fig)
 
-def cross_validation(x, y, sample, kfolds, label, trees, folder, site):
+def cross_validation(x, y, sample, kfolds, label, trees, folder, geo):
     '''Train Model with K-Fold Cross-Validation'''
     # Configure k-fold cross validation
     kf = KFold(n_splits = kfolds, shuffle = True, random_state = random.seed())
@@ -210,8 +215,8 @@ def cross_validation(x, y, sample, kfolds, label, trees, folder, site):
         # Save splits
         save_splits(x_train, y_train, x_test, y_test, x.index.to_series(), args, fold)
         # Visualise model performance
-        model_scatter(y_test, y_pred, folder, label, model = fold, site = site)
-        model_hist(y_test, y_pred, folder, label, model = fold, site = site)
+        model_scatter(y_test, y_pred, folder, label, model = fold, geo = geo)
+        model_hist(y_test, y_pred, folder, label, model = fold, geo = geo)
         # Store variable importances
         variable_importance(folder, label, x.columns, fold)
         fold += 1
@@ -232,6 +237,7 @@ if __name__ == '__main__':
     parser.add_argument('--sample', action = 'store_true', help = 'Adopt a smaller sample size of the available training data')
     parser.add_argument('--trees', type = int, default = 200, help = 'Number of trees in the random forest')
     parser.add_argument('--split', type = float, default = 0.3, help = 'Test split ratio')
+    parser.add_argument('--geo', help = 'Geolocation filtering condition: PALSAR or COVER or blank')
     args = parser.parse_args()
 
     # Isolate target and filtered predictor variables
@@ -241,6 +247,6 @@ if __name__ == '__main__':
     y, x, coords = isolate_data(input_filename, args.label)
 
     # Perform k-fold cross validation for model training
-    cross_validation(x, y, args.sample, args.kfolds, args.label, args.trees, args.folder, args.site)
+    cross_validation(x, y, args.sample, args.kfolds, args.label, args.trees, args.folder, args.site, args.geo)
 
 
