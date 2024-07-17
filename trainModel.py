@@ -241,12 +241,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Isolate target and filtered predictor variables
-    input_filename = (f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_{args.site}_EXTRACT_FINAL_COVER.csv'
+    input_filename = (f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_{args.site}_EXTRACT_FINAL_{args.geo}.csv'
                       if args.site else 
-                      f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_EXTRACT_FINAL_COVER.csv')
+                      f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_EXTRACT_FINAL_{args.geo}.csv')
     y, x, coords = isolate_data(input_filename, args.label)
 
     # Perform k-fold cross validation for model training
-    cross_validation(x, y, args.sample, args.kfolds, args.label, args.trees, args.folder, args.site, args.geo)
+    cross_validation(x, y, args.sample, args.kfolds, args.label, args.trees, args.folder, args.geo)
 
 
