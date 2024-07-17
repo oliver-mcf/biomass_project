@@ -127,7 +127,7 @@ def model_scatter(y_test, y_pred, folder, label, model, site):
     fig, ax = plt.subplots(figsize = (12, 10))
     ax.scatter(y_test, y_pred, marker = '.', color = 'steelblue')
     if site:
-        upper = 100
+        upper = 150
         step = 5
     else:
         upper = 300
@@ -159,9 +159,10 @@ def model_hist(y_test, y_pred, folder, label, model, site):
     fig, ax = plt.subplots(figsize = (12, 10))
     if site:
         bins = 25
-        upper = 100
+        upper = 150
         step = 5
-    
+        # geo_palsar removes higher values, few greater than 60 [manual "upper" to 100]
+        # geo_cover keeps some higher values greater than 100 [manual "upper" to 150]
     else:
         bins = 50
         upper = 300
@@ -185,7 +186,7 @@ def model_hist(y_test, y_pred, folder, label, model, site):
     plt.savefig(fig_name, dpi = 300)
     plt.close(fig)
 
-def cross_validation(x, y, sample, kfolds, label, trees, folder):
+def cross_validation(x, y, sample, kfolds, label, trees, folder, site):
     '''Train Model with K-Fold Cross-Validation'''
     # Configure k-fold cross validation
     kf = KFold(n_splits = kfolds, shuffle = True, random_state = random.seed())
@@ -209,8 +210,8 @@ def cross_validation(x, y, sample, kfolds, label, trees, folder):
         # Save splits
         save_splits(x_train, y_train, x_test, y_test, x.index.to_series(), args, fold)
         # Visualise model performance
-        model_scatter(y_test, y_pred, folder, label, model = fold)
-        model_hist(y_test, y_pred, folder, label, model = fold)
+        model_scatter(y_test, y_pred, folder, label, model = fold, site = site)
+        model_hist(y_test, y_pred, folder, label, model = fold, site = site)
         # Store variable importances
         variable_importance(folder, label, x.columns, fold)
         fold += 1
@@ -234,11 +235,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Isolate target and filtered predictor variables
-    input_filename = (f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_{args.site}_EXTRACT_FINAL_PALSAR.csv'
+    input_filename = (f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_{args.site}_EXTRACT_FINAL_COVER.csv'
                       if args.site else 
-                      f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_EXTRACT_FINAL_PALSAR.csv')
+                      f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_EXTRACT_FINAL_COVER.csv')
     y, x, coords = isolate_data(input_filename, args.label)
 
     # Perform k-fold cross validation for model training
-    cross_validation(x, y, args.sample, args.kfolds, args.label, args.trees, args.folder)
+    cross_validation(x, y, args.sample, args.kfolds, args.label, args.trees, args.folder, args.site)
+
 
