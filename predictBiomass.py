@@ -8,21 +8,23 @@ from libraries import *
 # Objects & Methods ################################################################################################
 from extractData import GeoTiff
 
-def filter_vars(vars, year):
+def filter_vars(site, year, geo):
     '''Filter Variables to Match Model Predictors'''
-    # Store variable names to retain
-    ref_csv = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_FILTERED_VARIABLES.csv'
+    # Identify variable names used in model
+    if geo:
+        ref_csv = f'/home/s1949330/data/diss_data/pred_vars/input_final/All_FILTERED_VARIABLES_{geo}.csv'
+    else:
+        ref_csv = '/home/s1949330/data/diss_data/pred_vars/input_final/All_FILTERED_VARIABLES.csv'
     df = pd.read_csv(ref_csv)
-    df['Retained'] = f'{year}_' + df['Retained'].astype(str)
-    var_names = df['Retained'].tolist()
-    print('Predictor Variables to Match: ', len(var_names))
-    # Retain variables found in reference df  
-    year_vars = []
-    for var in tqdm(vars, desc = "FILTER"):
-        base = os.path.splitext(os.path.basename(var))[0]
-        if base in var_names:
-            year_vars.append(var)
-    return year_vars
+    pred_vars = []
+    for name in df['Retained']:
+        if name.startswith("SRTM"):
+            srtm_var = f'/home/s1949330/data/diss_data/pred_vars/{site}/{name}.tif'
+            pred_vars.append(srtm_var)
+        else:
+            year_var = f'/home/s1949330/data/diss_data/pred_vars/{site}/{year}_{name}.tif'
+            pred_vars.append(year_var)
+    return pred_vars
 
 def prepare_vars(pred_vars, ref_var, site):
     '''Prepare Data for Model Predictions'''
@@ -34,8 +36,7 @@ def prepare_vars(pred_vars, ref_var, site):
     print(f'Common Variable Dimensions: {common_nX} x {common_nY}') 
     # Iterate through predictor variables to read data
     flat_dataset = []
-    #for var in tqdm(pred_vars, desc = "PREPARE"):
-    for var in pred_vars:
+    for var in tqdm(pred_vars, desc = "PREPARE"):
         pred = GeoTiff(var)
         data = pred.data[:common_nY, :common_nX]
         data_flat = data.flatten()
@@ -48,7 +49,7 @@ def prepare_vars(pred_vars, ref_var, site):
 
 def predict_agb(pred_flat, batch, folder, model):
     # Configure batch process
-    rf = joblib.load(f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/All_RF_MODEL_FOLD{model}.joblib')
+    rf = joblib.load(f'/home/s1949330/data/diss_data/model/{folder}/All_RF_MODEL_FOLD{model}.joblib')
     pred_agb = np.empty((pred_flat.shape[0],), dtype = float)
     batch_size = int(batch * pred_flat.shape[0])
     num_batches = int(math.ceil(pred_flat.shape[0] / batch_size))
@@ -59,36 +60,54 @@ def predict_agb(pred_flat, batch, folder, model):
         pred_agb[start_idx:end_idx] = rf.predict(pred_flat[start_idx:end_idx])
     return pred_agb
 
-def pred_hist(pred_data, bins, site, year, folder):
+def pred_hist(pred_data, bins, site, year, folder, geo):
     '''Plot Histogram from Array'''
     # Mask data for sensitivity
-    pred_data[pred_data > 200] = 200
+    pred_data[pred_data > 150] = 150
     # Plot the histogram
     plt.rcParams['font.family'] = 'Arial'
     plt.figure(figsize = (12, 10))
-    plt.hist(pred_data, bins = bins, color = 'teal', edgecolor = 'teal', alpha = 0.6)
-    plt.title(f'Histogram of Predicted Aboveground Biomass for {site}, 20{year}')
+    plt.hist(pred_data, bins = bins, color = 'teal', edgecolor = 'w')
+    plt.title(f'Histogram of Extrapolated GEDI AGB Estimates for {site}, 20{year}')
     plt.ylabel('Frequency')
+    max_val = np.max(pred_data)
+    plt.xlim(0, max_val)
+    plt.xticks(np.arange(0, max_val + 10, 10))
     plt.xlabel('Biomass (Mg/ha)')
-    plt.grid(True)
-    plt.savefig(f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/predict/{site}_{year}_PREDICT_AGB_HIST.png', dpi = 300)
+    plt.savefig(f'/home/s1949330/data/diss_data/model/{folder}/predict/{site}_{year}_PREDICT_AGB_{geo}_HIST.png', dpi = 300)
     plt.close()
 
-def pred_map(pred_data, nX, nY, folder, site, year):
+def pred_map(pred_data, nX, nY, folder, site, year, geo):
     '''Reshape Array of Predictions to Produce Map'''
     # Mask data for sensitivity
-    pred_data[pred_data > 200] = 200
+    pred_data[pred_data > 150] = 150
     # Visualise predicted biomass map
     plt.rcParams['font.family'] = 'Arial'
     agb_map = np.reshape(pred_data, (nY, nX))
-    plt.figure(figsize = (24, 20))
-    plt.imshow(agb_map, cmap = 'Greens', vmin = 0, vmax = 200)    
-    plt.title(f'Predicted Agboveground Biomass for {site}, 20{year}')
-    cbar = plt.colorbar(shrink = 0.75)
+    plt.figure(figsize = (12, 10))
+    plt.imshow(agb_map, cmap = 'Greens')    
+    plt.title(f'Extrapolated GEDI AGB Estimates for {site}, 20{year}')
+    cbar = plt.colorbar(shrink = 0.5)
     cbar.set_label('Biomass (Mg/ha)')
-    cbar.set_ticks(np.arange(0, 210, 10))
-    plt.savefig(f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/predict/{site}_{year}_PREDICT_AGB.png', dpi = 300)
+    max_val = np.max(pred_data)
+    cbar.set_ticks(np.arange(0, max_val + 1, 10))
+    plt.savefig(f'/home/s1949330/data/diss_data/model/{folder}/predict/{site}_{year}_PREDICT_AGB_{geo}_MAP.png', dpi = 300)
     plt.close()
+    return agb_map
+
+def write_tif(pred_data, x_origin, pixel_width, y_origin, pixel_height, epsg, output_tif):
+    geotransform = (x_origin, pixel_width, 0, y_origin, 0, pixel_height)    
+    dst_ds = gdal.GetDriverByName('GTiff').Create(output_tif, nX, nY, 1, gdal.GDT_Float32)
+    dst_ds.SetGeoTransform(geotransform)
+    srs = osr.SpatialReference()
+    srs.ImportFromEPSG(epsg) 
+    dst_ds.SetProjection(srs.ExportToWkt())
+    dst_ds.GetRasterBand(1).WriteArray(pred_data)
+    dst_ds.GetRasterBand(1).SetNoDataValue(-999)
+    dst_ds.FlushCache()     
+    dst_ds = None
+    print("Written to ", output_tif)
+    return
 
 
 # Code #############################################################################################################
@@ -99,31 +118,28 @@ if __name__ == '__main__':
     parser.add_argument("--model", type = int, required = True, choices = [1, 2, 3, 4, 5], help = "Name of trained model to use for predictions")
     parser.add_argument("--folder", type = str, required = True, help = "Directory containing model.")
     parser.add_argument("--site", type = str, required = True, help = "Study site by SEOSAW abbreviation.")
-    #parser.add_argument("--year", type = int, required = True, help = "End of austral year, eg: for Aug 2019 to July 2020, give 20 for 2020.")
     parser.add_argument("--batch", type = float, default = 0.05, help = 'Proportion of study site to compute predictions between 0-1 g: 0.05 for 5 percent')
     parser.add_argument("--bins", type = int, default = 20, help = 'Number of bins to arrange data in histogram')
+    parser.add_argument("--geo", help = 'Geolocation filtered csv for retained variables')
     args = parser.parse_args()
 
-    # Iterate over years
+    # Initialise years 
     year_list = ['20', '21', '22', '23']
     for year in year_list:
-        print(f'Currently Predicting Biomass for 20{year}...')
+        print(f'Predicting Biomass for 20{year}...')
 
         # Isolate filtered predictor variables
-        year_vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/{year}_*.tif')
-        vars = filter_vars(year_vars, year)
-        srtm_vars = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/{args.site}/SRTM_*.tif')
-        pred_vars = sorted(vars + srtm_vars)
+        pred_vars = filter_vars(args.site, year, args.geo)
         
         # Identify one reference variable
-        one_var = [f for f in pred_vars if os.path.basename(f) == f"{year}_HHHV_Ratio.tif"]
-        ref_var = GeoTiff(one_var[0])
+        one_var = f'/home/s1949330/data/diss_data/pred_vars/{args.site}/{year}_HHHV_Ratio.tif'
+        ref_var = GeoTiff(one_var)
 
         # Prepare predictor variables
         pred_flat, nX, nY = prepare_vars(pred_vars, ref_var, args.site)
         print(pred_flat.shape)
 
-        # Batch process model predictions
+        # Batch process model predictions and store data as csv
         pred_agb = predict_agb(pred_flat, args.batch, args.folder, args.model)
 
         # Sanity check biomass predictions 
@@ -133,9 +149,13 @@ if __name__ == '__main__':
         print('Min:', np.min(pred_agb))
 
         # Plot histogram of biomass predictions
-        pred_hist(pred_agb, args.bins, args.site, year, args.folder)
+        pred_hist(pred_agb, args.bins, args.site, year, args.folder, args.geo)
 
         # Visualise biomass prediction
-        pred_map(pred_agb, nX, nY, args.folder, args.site, year)
+        agb_map = pred_map(pred_agb, nX, nY, args.folder, args.site, year, args.geo)
 
         # Save biomass map as geotiff
+        output_tif = f'/home/s1949330/data/diss_data/model/{args.folder}/predict/{args.site}_{year}_PREDICT_AGB_{args.geo}.tif'
+        write_tif(agb_map, ref_var.xOrigin, ref_var.pixelWidth, ref_var.yOrigin, ref_var.pixelHeight, 3857, output_tif)
+
+
