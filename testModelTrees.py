@@ -79,4 +79,4 @@ if __name__ == '__main__':
         rf = param_train(x_train, y_train, n_estimators)
         stats_dict, y_pred = param_test(rf, x_test, y_test)
         print('Trees:', {n_estimators})
-        pprint(f"{stats_dict}\n")
+        pprint(stats_dict)
