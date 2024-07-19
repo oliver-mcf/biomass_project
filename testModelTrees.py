@@ -27,8 +27,23 @@ def param_train(x_train, y_train, trees):
 
 def param_test(rf, x_test, y_test):
     y_pred = rf.predict(x_test)
-    r2 = r2_score(y_test, y_pred)
-    return r2, y_pred
+    residuals = y_pred - y_test
+    constant = sm.add_constant(y_test)
+    white_test = sm.stats.diagnostic.het_white(residuals, constant)
+    stats_dict = {
+        'R2 (r2_score)': r2_score(y_test, y_pred),
+        'R2 (rf.score)': rf.score(x_test, y_test),
+        'R2 (variance)': explained_variance_score(y_test, y_pred),
+        'Bias': np.sum(y_pred - y_test) / y_pred.shape[0],
+        'MAE': np.mean(np.abs(y_test - y_pred)),
+        'MAE%': np.mean(np.abs(y_test - y_pred)) / np.mean(y_test) * 100,
+        'RMSE': sqrt(mean_squared_error(y_test, y_pred)),
+        'RMSE%': sqrt(mean_squared_error(y_test, y_pred)) / np.mean(y_test) * 100,
+        'R': stats.pearsonr(y_test, y_pred)[0],
+        'LM': white_test[0],
+        'F': white_test[2],
+        'P': white_test[1]}
+    return stats_dict, y_pred
 
 
 # Code #############################################################################################################
@@ -62,6 +77,7 @@ if __name__ == '__main__':
     # Iterate over n_estimators, train and test the model
     for n_estimators in n_estimators_list:
         rf = param_train(x_train, y_train, n_estimators)
-        r2, y_pred = param_test(rf, x_test, y_test)
-        r = stats.pearsonr(y_test, y_pred)[0]
-        print(f'Trees: {n_estimators}, R: {r:.3f}, R2: {r2:.3f}')
+        stats_dict, y_pred = param_test(rf, x_test, y_test)
+        print('Trees:', {n_estimators})
+        rounded_stats_dict = {f"{key:.3f}": value for key, value in stats_dict.items()}
+        pprint(rounded_stats_dict)
