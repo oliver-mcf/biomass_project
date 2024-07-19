@@ -10,7 +10,9 @@ from libraries import *
 def sample_year(file):       
     df = pd.read_csv(file)
     print(len(df))
+    # Comment next three lines to access data without no data filtering
     df = df.dropna()
+    df = df[(df != 0).all(axis = 1)]
     print(len(df))
     source_counts = df['Source'].value_counts()
     for source, count in sorted(source_counts.items()):
@@ -20,11 +22,11 @@ def var_regress(file, geo):
     '''Perform linear regression with target and predictor variables'''
     # Read file
     df = pd.read_csv(file)
-    df = df.drop(columns = ['GEDI_X', 'GEDI_Y', 'Source'])
     df = df.dropna()
+    df = df[(df != 0).all(axis = 1)]
     # Isolate target and predictor variables
     y = df['GEDI_AGB']    
-    pred_vars = df.drop(columns = ['GEDI_AGB'])
+    pred_vars = df.drop(columns = ['Source', 'GEDI_X', 'GEDI_Y', 'GEDI_COVER', 'GEDI_AGB'])
     # Prepare a dictionary to hold regression results
     results = {
         'Variable': [],
