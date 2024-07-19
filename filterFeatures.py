@@ -98,7 +98,7 @@ if __name__ == '__main__':
         else: 
             csv_file = '/home/s1949330/data/diss_data/pred_vars/input_merge/All_EXTRACT_MERGE.csv'
             output_csv = f'/home/s1949330/data/diss_data/pred_vars/input_final/All_EXTRACT_FINAL.csv'
-        df = isolate_data(csv_file, args.label, filter = True)
+        df = isolate_data(csv_file, label = 'All', filter = True)
 
         # Perform correlation matrix and remove pairs above threshold
         output_dir = f'/home/s1949330/data/diss_data/pred_vars/input_final/'
