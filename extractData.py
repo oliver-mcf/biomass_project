@@ -113,8 +113,6 @@ def export(array, labels, site, year):
     print(df_sorted.shape)
     output = f'/home/s1949330/data/diss_data/pred_vars/input_init/{site}_{year}_INPUT_DATA.csv'
     df_sorted.to_csv(output, index = False)
-    df_sorted = df_sorted.dropna()
-    print(len(df_sorted))
     print(f"Successful export: {output}\n")
 
 
