@@ -14,6 +14,7 @@ def isolate_data(filename, label, filter = False):
         source = df['Source']
     df = df.drop(columns = ['Source'])
     df = df.dropna()
+    df = df[(df != 0).all(axis = 1)]
     # Isolate target variables
     y = df['GEDI_AGB']
     coords = df[['GEDI_X', 'GEDI_Y']]
@@ -82,7 +83,7 @@ def test_model(x_test, y_test, folder, label, fold = None):
     stats_dict = {
         'R2 (r2_score)': r2_score(y_test, y_pred),
         'R2 (rf.score)': rf.score(x_test, y_test),
-        'R2 (explained_variance_score)': explained_variance_score(y_test, y_pred),
+        'R2 (variance)': explained_variance_score(y_test, y_pred),
         'Bias': np.sum(y_pred - y_test) / y_pred.shape[0],
         'MAE': np.mean(np.abs(y_test - y_pred)),
         'MAE%': np.mean(np.abs(y_test - y_pred)) / np.mean(y_test) * 100,
@@ -233,7 +234,7 @@ if __name__ == '__main__':
     parser.add_argument('--label', required = True, help = 'Predictor label (e.g., Landsat, Sentinel, Palsar, All)')
     parser.add_argument('--site', type = str, help = 'Condition to train and test model for specific site')
     parser.add_argument('--folder', required = True, help = 'Folder to save results')
-    parser.add_argument('--kfolds', type = int, required = True, help = 'Number of k-folds for cross-validation')
+    parser.add_argument('--kfolds', type = int, default = 10, help = 'Number of k-folds for cross-validation')
     parser.add_argument('--sample', action = 'store_true', help = 'Adopt a smaller sample size of the available training data')
     parser.add_argument('--trees', type = int, default = 200, help = 'Number of trees in the random forest')
     parser.add_argument('--split', type = float, default = 0.3, help = 'Test split ratio')
