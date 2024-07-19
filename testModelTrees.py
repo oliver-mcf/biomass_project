@@ -43,7 +43,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Isolate target and predictor variables
-    input_filename = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_EXTRACT_FINAL.csv'
+    input_filename = '/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_EXTRACT_FINAL_COVER.csv'
     y, x, _ = isolate_data(input_filename, args.label)
 
     # Generate random subset of training data
@@ -57,7 +57,7 @@ if __name__ == '__main__':
     x_train, x_test, y_train, y_test = split_data(x, y, split_ratio = args.split)
 
     # List of n_estimators to iterate over
-    n_estimators_list = [100, 200, 300]
+    n_estimators_list = [100, 200, 300, 400, 500]
 
     # Iterate over n_estimators, train and test the model
     for n_estimators in n_estimators_list:
