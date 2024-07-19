@@ -120,19 +120,19 @@ def variable_importance(folder, label, var_names, fold = None):
 def model_scatter(y_test, y_pred, folder, label, model, geo):
     '''Plot Scatter of Observed and Predicted Values'''
     # Constrain values to model sensitivity
-    mask = (y_test < 300) & (y_pred < 300)
+    mask = (y_test < 120) & (y_pred < 120)
     y_test = y_test[mask]
     y_pred = y_pred[mask]
     # Plot scatter
     plt.rcParams['font.family'] = 'Arial'
-    fig, ax = plt.subplots(figsize = (12, 10))
-    ax.scatter(y_test, y_pred, marker = '.', color = 'steelblue')
+    fig, ax = plt.subplots(figsize = (8,8))
+    ax.scatter(y_test, y_pred, marker = '.', color = 'lightsteelblue')
     if geo == 'PALSAR':
         upper = 100
         step = 5
     elif geo == 'COVER':
         upper = 150
-        step = 5
+        step = 10
     else:
         upper = 300
         step = 10
@@ -155,27 +155,27 @@ def model_scatter(y_test, y_pred, folder, label, model, geo):
 def model_hist(y_test, y_pred, folder, label, model, geo):
     '''Plot Histogram of Observed and Predicted Values'''
     # Constrain values to model sensitivity
-    mask = (y_test < 300) & (y_pred < 300)
+    mask = (y_test < 120) & (y_pred < 120)
     y_test = y_test[mask]
     y_pred = y_pred[mask]
     # Plot histogram
     plt.rcParams['font.family'] = 'Arial'
-    fig, ax = plt.subplots(figsize = (12, 10))
+    fig, ax = plt.subplots(figsize = (10,8))
     if geo == 'PALSAR':
         bins = 25
-        upper = 100
+        upper = 150
         step = 5
     elif geo == 'COVER':
         bins = 25
         upper = 150
-        step = 5
+        step = 10
     else:
         bins = 50
         upper = 300
-        step = 10
-    hist = plt.hist2d(y_test, y_pred, bins = (bins,bins), cmap = 'viridis', cmin = 1)
+        step = 10    
+    hist = plt.hist2d(y_test, y_pred, bins = (bins,bins), cmap = 'BuPu', cmin = 1)
     #plt.colorbar(shrink = 0.75)
-    cbar = plt.colorbar(hist[3], shrink = 0.5, ticks = np.arange(0, 300, step))
+    cbar = plt.colorbar(hist[3], shrink = 0.5, ticks = np.arange(0, upper, 2))
     ax.plot([0,upper], [0,upper], ls = 'solid', color = 'k')
     # Plot line of best fit
     slope, intercept = np.polyfit(y_test, y_pred, 1)
