@@ -9,7 +9,7 @@ from libraries import *
 from trainModel import *
 
 def spatial_cv(train_filename, test_filename, label, trees, folder, geo):
-    '''Train Model with K-Fold Cross-Validation'''
+    '''Train Model with Spatial-Validation'''
     # Load data from separate sites
     y_train, x_train, _ = isolate_data(train_filename, label)
     y_test, x_test, _ = isolate_data(test_filename, label)
