@@ -63,10 +63,10 @@ def predict_agb(pred_flat, batch, folder, model):
 def pred_hist(pred_data, bins, site, year, folder, geo):
     '''Plot Histogram from Array'''
     # Mask data for sensitivity
-    pred_data[pred_data > 150] = 150
+    pred_data[pred_data > 120] = 120
     # Plot the histogram
     plt.rcParams['font.family'] = 'Arial'
-    plt.figure(figsize = (12, 10))
+    plt.figure(figsize = (8, 8))
     plt.hist(pred_data, bins = bins, color = 'teal', edgecolor = 'w')
     plt.title(f'Histogram of Extrapolated GEDI AGB Estimates for {site}, 20{year}')
     plt.ylabel('Frequency')
@@ -80,11 +80,11 @@ def pred_hist(pred_data, bins, site, year, folder, geo):
 def pred_map(pred_data, nX, nY, folder, site, year, geo):
     '''Reshape Array of Predictions to Produce Map'''
     # Mask data for sensitivity
-    pred_data[pred_data > 150] = 150
+    pred_data[pred_data > 120] = 120
     # Visualise predicted biomass map
     plt.rcParams['font.family'] = 'Arial'
     agb_map = np.reshape(pred_data, (nY, nX))
-    plt.figure(figsize = (12, 10))
+    plt.figure(figsize = (10, 8))
     plt.imshow(agb_map, cmap = 'Greens')    
     plt.title(f'Extrapolated GEDI AGB Estimates for {site}, 20{year}')
     cbar = plt.colorbar(shrink = 0.5)
@@ -115,7 +115,7 @@ if __name__ == '__main__':
 
     # Define command line arguments
     parser = argparse.ArgumentParser(description = "Extract data for a given site over given year(s).")
-    parser.add_argument("--model", type = int, required = True, choices = [1, 2, 3, 4, 5], help = "Name of trained model to use for predictions")
+    parser.add_argument("--model", type = int, required = True, help = "Name of trained model (1-10) to use for predictions")
     parser.add_argument("--folder", type = str, required = True, help = "Directory containing model.")
     parser.add_argument("--site", type = str, required = True, help = "Study site by SEOSAW abbreviation.")
     parser.add_argument("--batch", type = float, default = 0.05, help = 'Proportion of study site to compute predictions between 0-1 g: 0.05 for 5 percent')
