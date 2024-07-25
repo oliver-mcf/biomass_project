@@ -31,12 +31,12 @@ def prepare_vars(pred_vars, year, site):
     reproject(pred_vars, 3857)
     resample(pred_vars, 25)
     # Set common dimensions for variables
-    one_var = f'/home/s1949330/data/diss_data/pred_vars/{site}/{year}_HHHV_Ratio.tif'
+    one_var = f'/home/s1949330/data/diss_data/pred_vars/{site}/{year}_HV_Median.tif'
     ref_var = GeoTiff(one_var)
     if site == 'MGR':
         common_nX, common_nY = ref_var.nX, ref_var.nY
     elif site == 'TKW':
-        common_nX, common_nY = ref_var.nX, ref_var.nY - 1
+        common_nX, common_nY = ref_var.nX, (ref_var.nY - 2)
     print(f'Common Variable Dimensions: {common_nX} x {common_nY}') 
     # Iterate through predictor variables to read data
     flat_dataset = []
