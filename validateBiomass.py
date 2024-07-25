@@ -3,7 +3,7 @@
 
 # Libraries ########################################################################################################
 from libraries import *
-
+from extractData import GeoTiff
 
 # Objects & Methods ################################################################################################
 
@@ -27,10 +27,18 @@ def reproject_plots(lon, lat, epsg):
     x, y = transformer.transform(lon.values, lat.values)
     return x, y
 
-# read predicted biomass geotiff data as array with coords
+def intersect_plots(gedi, field_df):
+    '''Identify Intersecting Plot-Pixel AGB estimates'''
+    n_plots = len(field_df)
+    plot_intersect = np.full(n_plots, np.nan, dtype = float)
+    for i, plot in enumerate(range(n_plots)):
+        xInd = np.floor((field_df['X'].iloc[i] - gedi.xOrigin) / gedi.pixelWidth).astype(int)
+        yInd = np.floor((field_df['Y'].iloc[i] - gedi.yOrigin) / gedi.pixelHeight).astype(int)
+        if 0 <= xInd < gedi.nX and 0 <= yInd < gedi.nY:
+            pixel_value = gedi.data[yInd, xInd]
+            plot_intersect[i] = pixel_value
+    return plot_intersect
 
-
-# extract intersecting pixels/plots
 
 # compute statistical metrics
 
@@ -48,6 +56,15 @@ if __name__ == '__main__':
 
     # Read field AGB estimates
     csv_file = '/home/s1949330/data/diss_data/seosaw/seosaw_agb.csv'
-    df = read_plots(csv_file, args.year, args.site)
-    pprint(df)
+    field_df = read_plots(csv_file, args.year, args.site)
+    pprint(field_df)
 
+    # Read GEDI AGB estimates
+    pred = f'/home/s1949330/data/diss_data/model/yes_geo/All/predict/{args.site}_{args.year}_PREDICT_AGB_COVER.tif'
+    gedi = GeoTiff(pred)
+
+    # Isolate GEDI AGB estimates in plots
+    plot_intersect = intersect_plots(gedi, field_df)
+    print(plot_intersect)
+
+    
