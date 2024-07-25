@@ -36,7 +36,6 @@ def plot_hist(data, bins, label, name):
     '''Plot Histogram from Array'''
     plt.rcParams['font.family'] = 'Arial'
     fig, ax = plt.subplots(figsize = (8,6))
-    data = data[data < 500]
     data_flat = data.flatten()
     plt.hist(data_flat, bins = bins, color = 'teal', edgecolor = 'white', alpha = 0.6)
     plt.ylabel('Frequency')
@@ -77,13 +76,14 @@ def plot_lines(csv_file1, csv_file2, site, name):
     months2 = df2.iloc[:, 0]
     data2 = df2[f'{site}']
     plt.rcParams['font.family'] = 'Arial'
-    fig, ax1 = plt.subplots(figsize=(8, 6))
+    fig, ax1 = plt.subplots(figsize=(6, 6))
     ax1.bar(months1, data1, align = 'center', color = 'lightsteelblue', edgecolor = 'white')
-    ax1.set_xlabel('Months')
     ax1.set_ylabel('Precipitation (mm)')
+    ax1.set_ylim(0, 250)
     ax2 = ax1.twinx()
-    ax2.plot(months2, data2, color='green', marker='.', linestyle='-', markersize = 10)
+    ax2.plot(months2, data2, color='forestgreen', marker='.', linestyle='-', markersize = 10)
     ax2.set_ylabel('NDVI')
+    ax2.set_ylim(0, 0.45)
     plt.savefig(f'/home/s1949330/data/diss_data/figures/study_sites/{name}.png', dpi=300)
     plt.close()
 
@@ -152,24 +152,24 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Read file
-    #tif = f'/home/s1949330/data/diss_data/pred_vars/{args.site}/SRTM_Elevation.tif'
-    #var = GeoTiff(tif)
+    tif = f'/home/s1949330/data/diss_data/pred_vars/{args.site}/SRTM_Elevation.tif'
+    var = GeoTiff(tif)
 
     # Plot histogram
-    #plot_hist(var.data, 25, args.label, args.name)
+    plot_hist(var.data, 25, args.label, args.name)
 
     # Plot bar chart
-    #csv_file = '/home/s1949330/data/diss_data/figures/study_sites/annual_precip.csv'
-    #plot_bar(csv_file, args.site, args.label, args.name)
+    csv_file = '/home/s1949330/data/diss_data/figures/study_sites/annual_precip.csv'
+    plot_bar(csv_file, args.site, args.label, args.name)
 
     # Plot line chart
-    #csv_file1 = '/home/s1949330/data/diss_data/figures/study_sites/month_precip.csv'
-    #csv_file2 = '/home/s1949330/data/diss_data/figures/study_sites/month_ndvi.csv'
-    #plot_lines(csv_file1, csv_file2, args.site, args.name)
+    csv_file1 = '/home/s1949330/data/diss_data/figures/study_sites/month_precip.csv'
+    csv_file2 = '/home/s1949330/data/diss_data/figures/study_sites/month_ndvi.csv'
+    plot_lines(csv_file1, csv_file2, args.site, args.name)
 
     # Plot density map
-    #tif = f'/home/s1949330/data/diss_data/gedi/{args.site}/ALL_GEDI_AGB.tif'
-    #plot_density(tif, 20, args.name)
+    tif = f'/home/s1949330/data/diss_data/gedi/{args.site}/ALL_GEDI_AGB.tif'
+    plot_density(tif, 20, args.name)
 
     # Store tif data in csv
     tif_list = glob(f'/home/s1949330/data/diss_data/gedi/{args.site}/2*_GEDI_AGB.tif')
