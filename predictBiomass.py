@@ -6,7 +6,7 @@ from libraries import *
 
 
 # Objects & Methods ################################################################################################
-from extractData import GeoTiff
+from extractData import GeoTiff, get_epsg, reproject, resample
 
 def filter_vars(site, year, geo):
     '''Filter Variables to Match Model Predictors'''
@@ -26,9 +26,13 @@ def filter_vars(site, year, geo):
             pred_vars.append(year_var)
     return pred_vars
 
-def prepare_vars(pred_vars, ref_var, site):
+def prepare_vars(pred_vars, year, site):
     '''Prepare Data for Model Predictions'''
+    reproject(pred_vars, 3857)
+    resample(pred_vars, 25)
     # Set common dimensions for variables
+    one_var = f'/home/s1949330/data/diss_data/pred_vars/{site}/{year}_HHHV_Ratio.tif'
+    ref_var = GeoTiff(one_var)
     if site == 'MGR':
         common_nX, common_nY = ref_var.nX, ref_var.nY
     elif site == 'TKW':
@@ -45,7 +49,7 @@ def prepare_vars(pred_vars, ref_var, site):
     # Align flattened predictor variables
     pred_flat = np.stack(flat_dataset, axis = -1)
     print(pred_flat.shape)
-    return pred_flat, common_nX, common_nY
+    return pred_flat, common_nX, common_nY, ref_var
 
 def predict_agb(pred_flat, batch, folder, model):
     # Configure batch process
@@ -130,13 +134,9 @@ if __name__ == '__main__':
 
         # Isolate filtered predictor variables
         pred_vars = filter_vars(args.site, year, args.geo)
-        
-        # Identify one reference variable
-        one_var = f'/home/s1949330/data/diss_data/pred_vars/{args.site}/{year}_HHHV_Ratio.tif'
-        ref_var = GeoTiff(one_var)
 
         # Prepare predictor variables
-        pred_flat, nX, nY = prepare_vars(pred_vars, ref_var, args.site)
+        pred_flat, nX, nY, ref_var = prepare_vars(pred_vars, year, args.site)
         print(pred_flat.shape)
 
         # Batch process model predictions and store data as csv
@@ -157,5 +157,3 @@ if __name__ == '__main__':
         # Save biomass map as geotiff
         output_tif = f'/home/s1949330/data/diss_data/model/{args.folder}/predict/{args.site}_{year}_PREDICT_AGB_{args.geo}.tif'
         write_tif(agb_map, ref_var.xOrigin, ref_var.pixelWidth, ref_var.yOrigin, ref_var.pixelHeight, 3857, output_tif)
-
-
