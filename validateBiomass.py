@@ -68,20 +68,20 @@ def validation_plot(field, gedi, site, year):
     '''Plot Scatter of Observed and Predicted Values'''
     # Plot scatter
     plt.rcParams['font.family'] = 'Arial'
-    fig, ax = plt.subplots(figsize = (8,8))
-    ax.scatter(field, gedi, marker = '.', color = 'tab:blue')
-    ax.plot([0, 150], [0, 150], ls = 'solid', color = 'k')
+    fig, ax = plt.subplots(figsize = (5,5))
+    ax.scatter(field, gedi, marker = 'o', color = 'tab:blue')
+    ax.plot([0, 120], [0, 120], ls = 'solid', color = 'k')
     # Plot line of best fit
     slope, intercept = np.polyfit(field, gedi, 1)
     best_fit = slope * np.array(field) + intercept
     ax.plot(field, best_fit, ls = 'solid', color = 'red', label = 'Linear')
-    ax.set_xlim([0, 150])
-    ax.set_ylim([0, 150])
-    ax.set_xticks(np.arange(0, 150 + 10, 10))
-    ax.set_yticks(np.arange(0, 150 + 10, 10))
+    ax.set_xlim([0, 120])
+    ax.set_ylim([0, 120])
+    ax.set_xticks(np.arange(0, 120 + 10, 10))
+    ax.set_yticks(np.arange(0, 120 + 10, 10))
     ax.set_xlabel('Field AGB Estimates (Mg/ha)')
     ax.set_ylabel('Extrapolated GEDI AGB Estimates (Mg/ha)')
-    ax.set_title(f'RFA Model Validation')
+    ax.set_title(f'Model Validation')
     fig_name = f'/home/s1949330/data/diss_data/model/yes_geo/All/predict/validate/{site}_{year}_VALIDATION_PLOT.png'
     plt.savefig(fig_name, dpi = 300)
     plt.close(fig)
@@ -133,7 +133,14 @@ if __name__ == '__main__':
     all_gedi = validation['GEDI_AGB']
     all_field = validation['Field_AGB']
     validation_stats(all_field, all_gedi, 'BOTH', 'ALL')
-
-    # Visualise all validation data on a scatter plot
     validation_plot(all_field, all_gedi, 'BOTH', 'ALL')
+
+    # Calculate statistics for site validation data
+    plot_sites = validation['Site'].unique()
+    for abb in plot_sites:
+        filtered_df = validation.loc[validation['Site'] == abb, ['Field_AGB', 'GEDI_AGB']]
+        all_field = filtered_df['Field_AGB']
+        all_gedi = filtered_df['GEDI_AGB']
+        validation_stats(all_field, all_gedi, abb, 'ALL')
+        validation_plot(all_field, all_gedi, abb, 'ALL')
     
