@@ -12,17 +12,17 @@ def filter_vars(site, year, geo):
     '''Filter Variables to Match Model Predictors'''
     # Identify variable names used in model
     if geo:
-        ref_csv = f'/home/s1949330/data/diss_data/pred_vars/input_final/All_FILTERED_VARIABLES_{geo}.csv'
+        ref_csv = f'/home/s1949330/scratch/diss_data/pred_vars/input_final/All_FILTERED_VARIABLES_{geo}.csv'
     else:
-        ref_csv = '/home/s1949330/data/diss_data/pred_vars/input_final/All_FILTERED_VARIABLES.csv'
+        ref_csv = '/home/s1949330/scratch/diss_data/pred_vars/input_final/All_FILTERED_VARIABLES.csv'
     df = pd.read_csv(ref_csv)
     pred_vars = []
     for name in df['Retained']:
         if name.startswith("SRTM"):
-            srtm_var = f'/home/s1949330/data/diss_data/pred_vars/{site}/{name}.tif'
+            srtm_var = f'/home/s1949330/scratch/diss_data/pred_vars/{site}/{name}.tif'
             pred_vars.append(srtm_var)
         else:
-            year_var = f'/home/s1949330/data/diss_data/pred_vars/{site}/{year}_{name}.tif'
+            year_var = f'/home/s1949330/scratch/diss_data/pred_vars/{site}/{year}_{name}.tif'
             pred_vars.append(year_var)
     return pred_vars
 
@@ -31,7 +31,7 @@ def prepare_vars(pred_vars, year, site):
     reproject(pred_vars, 3857)
     resample(pred_vars, 25)
     # Set common dimensions for variables
-    one_var = f'/home/s1949330/data/diss_data/pred_vars/{site}/{year}_HV_Median.tif'
+    one_var = f'/home/s1949330/scratch/diss_data/pred_vars/{site}/{year}_HV_Median.tif'
     ref_var = GeoTiff(one_var)
     if site == 'MGR':
         common_nX, common_nY = ref_var.nX, ref_var.nY
@@ -53,7 +53,7 @@ def prepare_vars(pred_vars, year, site):
 
 def predict_agb(pred_flat, batch, folder, model):
     # Configure batch process
-    rf = joblib.load(f'/home/s1949330/data/diss_data/model/{folder}/All_RF_MODEL_FOLD{model}.joblib')
+    rf = joblib.load(f'/home/s1949330/scratch/diss_data/model/{folder}/All_RF_MODEL_FOLD{model}.joblib')
     pred_agb = np.empty((pred_flat.shape[0],), dtype = float)
     batch_size = int(batch * pred_flat.shape[0])
     num_batches = int(math.ceil(pred_flat.shape[0] / batch_size))
@@ -78,7 +78,7 @@ def pred_hist(pred_data, bins, site, year, folder, geo):
     plt.xlim(0, max_val)
     plt.xticks(np.arange(0, max_val + 10, 10))
     plt.xlabel('Biomass (Mg/ha)')
-    plt.savefig(f'/home/s1949330/data/diss_data/model/{folder}/predict/{site}_{year}_PREDICT_AGB_{geo}_HIST.png', dpi = 300)
+    plt.savefig(f'/home/s1949330/scratch/diss_data/model/{folder}/predict/{site}_{year}_PREDICT_AGB_{geo}_HIST.png', dpi = 300)
     plt.close()
 
 def pred_map(pred_data, nX, nY, folder, site, year, geo):
@@ -95,7 +95,7 @@ def pred_map(pred_data, nX, nY, folder, site, year, geo):
     cbar.set_label('Biomass (Mg/ha)')
     max_val = np.max(pred_data)
     cbar.set_ticks(np.arange(0, max_val + 1, 10))
-    plt.savefig(f'/home/s1949330/data/diss_data/model/{folder}/predict/{site}_{year}_PREDICT_AGB_{geo}_MAP.png', dpi = 300)
+    plt.savefig(f'/home/s1949330/scratch/diss_data/model/{folder}/predict/{site}_{year}_PREDICT_AGB_{geo}_MAP.png', dpi = 300)
     plt.close()
     return agb_map
 
@@ -155,5 +155,5 @@ if __name__ == '__main__':
         agb_map = pred_map(pred_agb, nX, nY, args.folder, args.site, year, args.geo)
 
         # Save biomass map as geotiff
-        output_tif = f'/home/s1949330/data/diss_data/model/{args.folder}/predict/{args.site}_{year}_PREDICT_AGB_{args.geo}.tif'
+        output_tif = f'/home/s1949330/scratch/diss_data/model/{args.folder}/predict/{args.site}_{year}_PREDICT_AGB_{args.geo}.tif'
         write_tif(agb_map, ref_var.xOrigin, ref_var.pixelWidth, ref_var.yOrigin, ref_var.pixelHeight, 3857, output_tif)
