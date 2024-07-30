@@ -45,8 +45,8 @@ def save_splits(x_train, y_train, x_test, y_test, coords, args, fold = None):
     training_data = pd.concat([coords, pd.DataFrame(x_train), pd.DataFrame({'y_train': y_train})], axis = 1).dropna(subset = ['y_train'])
     testing_data = pd.concat([coords, pd.DataFrame(x_test), pd.DataFrame({'y_test': y_test})], axis = 1).dropna(subset = ['y_test'])
     # Consider site-specific condition
-    training_data_filename = f'/home/s1949330/Documents/scratch/diss_data/model/{args.folder}/{args.label}_MODEL_TRAINING.csv'
-    testing_data_filename = f'/home/s1949330/Documents/scratch/diss_data/model/{args.folder}/{args.label}_MODEL_TESTING.csv'
+    training_data_filename = f'/home/s1949330/scratch/diss_data/model/{args.folder}/{args.label}_MODEL_TRAINING.csv'
+    testing_data_filename = f'/home/s1949330/scratch/diss_data/model/{args.folder}/{args.label}_MODEL_TESTING.csv'
     # Consider iterative model training and testing
     if fold is not None:
         training_data_filename = training_data_filename.replace('.csv', f'_FOLD{fold + 1}.csv')
@@ -62,7 +62,7 @@ def train_model(x_train, y_train, label, trees, folder, fold = None):
     rf = RandomForestRegressor(n_estimators = trees, random_state = random.seed())
     rf.fit(x_train, y_train)
     # Save trained model
-    model_filename = f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_RF_MODEL.joblib'
+    model_filename = f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_RF_MODEL.joblib'
     if fold is not None:
         model_filename = model_filename.replace('.joblib', f'_FOLD{fold + 1}.joblib')
     joblib.dump(rf, model_filename)
@@ -70,7 +70,7 @@ def train_model(x_train, y_train, label, trees, folder, fold = None):
 def test_model(x_test, y_test, folder, label, fold = None):
     '''Test Model with Withheld Subset of Available Training Data'''
     # Read model
-    model_filename = f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_RF_MODEL.joblib'
+    model_filename = f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_RF_MODEL.joblib'
     if fold is not None:
         model_filename = model_filename.replace('.joblib', f'_FOLD{fold + 1}.joblib')
     print(f"Loading: {os.path.basename(model_filename)}")
@@ -100,14 +100,14 @@ def test_model(x_test, y_test, folder, label, fold = None):
 def variable_importance(folder, label, var_names, fold = None):
     '''Save Predictor Variable Importance in Model'''
     # Read model
-    model_filename = f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_RF_MODEL.joblib'
+    model_filename = f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_RF_MODEL.joblib'
     if fold is not None:
         model_filename = model_filename.replace('.joblib', f'_FOLD{fold + 1}.joblib')
     rf = joblib.load(model_filename)
     importances = rf.feature_importances_
     sorted_idx = np.argsort(importances)[::-1]
     # Write variable importances to csv
-    output_filename = f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_VARIABLE_IMPORTANCE.csv'
+    output_filename = f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_VARIABLE_IMPORTANCE.csv'
     if fold is not None:
         output_filename = output_filename.replace('.csv', f'_FOLD{fold + 1}.csv')
     with open(output_filename, mode = 'w', newline = '') as file:
@@ -148,7 +148,7 @@ def model_scatter(y_test, y_pred, folder, label, model, geo):
     ax.set_xlabel('Observed AGB (Mg/ha)')
     ax.set_ylabel('Predicted AGB (Mg/ha)')
     ax.set_title(f'{label} Model - Observed vs Predicted')
-    fig_name = f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_MODEL_SCATTER_FOLD{model + 1}.png'
+    fig_name = f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_MODEL_SCATTER_FOLD{model + 1}.png'
     plt.savefig(fig_name, dpi = 300)
     plt.close(fig)
 
@@ -188,7 +188,7 @@ def model_hist(y_test, y_pred, folder, label, model, geo):
     ax.set_xlabel('Observed AGB (Mg/ha)')
     ax.set_ylabel('Predicted AGB (Mg/ha)')
     ax.set_title(f'{label} Model - Observed vs Predicted')
-    fig_name = f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_MODEL_HIST_FOLD{model + 1}.png'
+    fig_name = f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_MODEL_HIST_FOLD{model + 1}.png'
     plt.savefig(fig_name, dpi = 300)
     plt.close(fig)
 
@@ -223,7 +223,7 @@ def cross_validation(x, y, sample, kfolds, label, trees, folder, geo):
         fold += 1
     # Save statistics to csv
     stats_df = pd.DataFrame(stats_list)
-    stats_df.to_csv(f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_KFOLD_STATS.csv', index = False)
+    stats_df.to_csv(f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_KFOLD_STATS.csv', index = False)
 
 
 # Code #############################################################################################################
@@ -242,9 +242,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Isolate target and filtered predictor variables
-    input_filename = (f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_{args.site}_EXTRACT_FINAL_{args.geo}.csv'
+    input_filename = (f'/home/s1949330/scratch/diss_data/pred_vars/input_final/All_{args.site}_EXTRACT_FINAL_{args.geo}.csv'
                       if args.site else 
-                      f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_EXTRACT_FINAL_{args.geo}.csv')
+                      f'/home/s1949330/scratch/diss_data/pred_vars/input_final/All_EXTRACT_FINAL_{args.geo}.csv')
     y, x, coords = isolate_data(input_filename, args.label)
 
     # Perform k-fold cross validation for model training
