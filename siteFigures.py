@@ -40,7 +40,7 @@ def plot_hist(data, bins, label, name):
     plt.hist(data_flat, bins = bins, color = 'teal', edgecolor = 'white', alpha = 0.6)
     plt.ylabel('Frequency')
     plt.xlabel(f'{label}')
-    plt.savefig(f'/home/s1949330/data/diss_data/figures/study_sites/{name}.png', dpi = 300)
+    plt.savefig(f'/home/s1949330/scratch/diss_data/figures/study_sites/{name}.png', dpi = 300)
     plt.close()
 
 def plot_bar(csv_file, site, label, name):
@@ -52,7 +52,7 @@ def plot_bar(csv_file, site, label, name):
     fig, ax = plt.subplots(figsize = (8,6))
     plt.bar(years, data, align = 'center', color = 'lightsteelblue', edgecolor = 'white')
     plt.ylabel(f'{label}')
-    plt.savefig(f'/home/s1949330/data/diss_data/figures/study_sites/{name}.png', dpi = 300)
+    plt.savefig(f'/home/s1949330/scratch/diss_data/figures/study_sites/{name}.png', dpi = 300)
     plt.close()
 
 def plot_line(csv_file, site, label, name):
@@ -64,7 +64,7 @@ def plot_line(csv_file, site, label, name):
     fig, ax = plt.subplots(figsize = (8,6))
     plt.plot(months, data, color = 'navy', marker = '.')
     plt.ylabel(f'{label}')
-    plt.savefig(f'/home/s1949330/data/diss_data/figures/study_sites/{name}.png', dpi = 300)
+    plt.savefig(f'/home/s1949330/scratch/diss_data/figures/study_sites/{name}.png', dpi = 300)
     plt.close()
 
 def plot_lines(csv_file1, csv_file2, site, name):
@@ -84,7 +84,7 @@ def plot_lines(csv_file1, csv_file2, site, name):
     ax2.plot(months2, data2, color='forestgreen', marker='.', linestyle='-', markersize = 10)
     ax2.set_ylabel('NDVI')
     ax2.set_ylim(0, 0.45)
-    plt.savefig(f'/home/s1949330/data/diss_data/figures/study_sites/{name}.png', dpi=300)
+    plt.savefig(f'/home/s1949330/scratch/diss_data/figures/study_sites/{name}.png', dpi=300)
     plt.close()
 
 def plot_density(tif, grid_size, name):
@@ -118,7 +118,7 @@ def plot_density(tif, grid_size, name):
     ax.set_xticks([])
     ax.set_yticks([])
     plt.colorbar(label = 'Count', shrink = 0.5)
-    plt.savefig(f'/home/s1949330/data/diss_data/figures/study_sites/{name}.png', dpi=300)
+    plt.savefig(f'/home/s1949330/scratch/diss_data/figures/study_sites/{name}.png', dpi=300)
     plt.close()
 
 def get_csv(tif_list, out_name):
@@ -134,7 +134,7 @@ def get_csv(tif_list, out_name):
     # Create DataFrame
     df = pd.DataFrame(flattened_array, columns=col_names)
     pprint(df.head())
-    df.to_csv(f'/home/s1949330/data/diss_data/figures/{out_name}.csv', index = False)
+    df.to_csv(f'/home/s1949330/scratch/diss_data/figures/{out_name}.csv', index = False)
     # Count the number of non-NaN and NaN values in each column
     for col in df.columns:
         count = df[col].notna().sum()
@@ -152,25 +152,25 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Read file
-    tif = f'/home/s1949330/data/diss_data/pred_vars/{args.site}/SRTM_Elevation.tif'
+    tif = f'/home/s1949330/scratch/diss_data/pred_vars/{args.site}/SRTM_Elevation.tif'
     var = GeoTiff(tif)
 
     # Plot histogram
     plot_hist(var.data, 25, args.label, args.name)
 
     # Plot bar chart
-    csv_file = '/home/s1949330/data/diss_data/figures/study_sites/annual_precip.csv'
+    csv_file = '/home/s1949330/scratch/diss_data/figures/study_sites/annual_precip.csv'
     plot_bar(csv_file, args.site, args.label, args.name)
 
     # Plot line chart
-    csv_file1 = '/home/s1949330/data/diss_data/figures/study_sites/month_precip.csv'
-    csv_file2 = '/home/s1949330/data/diss_data/figures/study_sites/month_ndvi.csv'
+    csv_file1 = '/home/s1949330/scratch/diss_data/figures/study_sites/month_precip.csv'
+    csv_file2 = '/home/s1949330/scratch/diss_data/figures/study_sites/month_ndvi.csv'
     plot_lines(csv_file1, csv_file2, args.site, args.name)
 
     # Plot density map
-    tif = f'/home/s1949330/data/diss_data/gedi/{args.site}/ALL_GEDI_AGB.tif'
+    tif = f'/home/s1949330/scratch/diss_data/gedi/{args.site}/ALL_GEDI_AGB.tif'
     plot_density(tif, 20, args.name)
 
     # Store tif data in csv
-    tif_list = glob(f'/home/s1949330/data/diss_data/gedi/{args.site}/2*_GEDI_AGB.tif')
+    tif_list = glob(f'/home/s1949330/scratch/diss_data/gedi/{args.site}/2*_GEDI_AGB.tif')
     get_csv(tif_list, args.name)
