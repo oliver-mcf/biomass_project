@@ -93,27 +93,27 @@ if __name__ == '__main__':
         
         # Isolate variables by group/label given
         if args.geo:
-            csv_file = f'/home/s1949330/data/diss_data/pred_vars/input_merge/All_EXTRACT_MERGE_{args.geo}.csv'
-            output_csv = f'/home/s1949330/data/diss_data/pred_vars/input_final/All_EXTRACT_FINAL_{args.geo}.csv'
+            csv_file = f'/home/s1949330/scratch/diss_data/pred_vars/input_merge/All_EXTRACT_MERGE_{args.geo}.csv'
+            output_csv = f'/home/s1949330/scratch/diss_data/pred_vars/input_final/All_EXTRACT_FINAL_{args.geo}.csv'
         else: 
-            csv_file = '/home/s1949330/data/diss_data/pred_vars/input_merge/All_EXTRACT_MERGE.csv'
-            output_csv = f'/home/s1949330/data/diss_data/pred_vars/input_final/All_EXTRACT_FINAL.csv'
+            csv_file = '/home/s1949330/scratch/diss_data/pred_vars/input_merge/All_EXTRACT_MERGE.csv'
+            output_csv = f'/home/s1949330/scratch/diss_data/pred_vars/input_final/All_EXTRACT_FINAL.csv'
         df = isolate_data(csv_file, label = 'All', filter = True)
 
         # Perform correlation matrix and remove pairs above threshold
-        output_dir = f'/home/s1949330/data/diss_data/pred_vars/input_final/'
+        output_dir = f'/home/s1949330/scratch/diss_data/pred_vars/input_final/'
         matrix(df, args.geo, args.coef, output_dir, output_csv)
         
     # Reduce site data to match filtered predictor variables
     if args.reduce:
         
         if args.geo:
-            csv_list = [f'/home/s1949330/data/diss_data/pred_vars/input_merge/All_MGR_EXTRACT_MERGE_{args.geo}.csv', 
-                        f'/home/s1949330/data/diss_data/pred_vars/input_merge/All_TKW_EXTRACT_MERGE_{args.geo}.csv']
-            ref_csv = f'/home/s1949330/data/diss_data/pred_vars/input_final/All_EXTRACT_FINAL_{args.geo}.csv'
+            csv_list = [f'/home/s1949330/scratch/diss_data/pred_vars/input_merge/All_MGR_EXTRACT_MERGE_{args.geo}.csv', 
+                        f'/home/s1949330/scratch/diss_data/pred_vars/input_merge/All_TKW_EXTRACT_MERGE_{args.geo}.csv']
+            ref_csv = f'/home/s1949330/scratch/diss_data/pred_vars/input_final/All_EXTRACT_FINAL_{args.geo}.csv'
         else:
-            csv_list = [f'/home/s1949330/data/diss_data/pred_vars/input_merge/All_MGR_EXTRACT_MERGE.csv', 
-                        f'/home/s1949330/data/diss_data/pred_vars/input_merge/All_TKW_EXTRACT_MERGE.csv']
-            ref_csv = '/home/s1949330/data/diss_data/pred_vars/input_final/All_EXTRACT_FINAL.csv'
-        output_dir = '/home/s1949330/data/diss_data/pred_vars/input_final/'
+            csv_list = [f'/home/s1949330/scratch/diss_data/pred_vars/input_merge/All_MGR_EXTRACT_MERGE.csv', 
+                        f'/home/s1949330/scratch/diss_data/pred_vars/input_merge/All_TKW_EXTRACT_MERGE.csv']
+            ref_csv = '/home/s1949330/scratch/diss_data/pred_vars/input_final/All_EXTRACT_FINAL.csv'
+        output_dir = '/home/s1949330/scratch/diss_data/pred_vars/input_final/'
         reduce(ref_csv, csv_list, output_dir, args.geo)
