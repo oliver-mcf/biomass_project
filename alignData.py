@@ -89,7 +89,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Identify filtered input data
-    csv_list = glob(f'/home/s1949330/data/diss_data/pred_vars/input_init/*.csv')
+    csv_list = glob(f'/home/s1949330/scratch/diss_data/pred_vars/input_init/*.csv')
     
     # Define variable names
     fixed_columns = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB', 'GEDI_COVER',
@@ -111,9 +111,9 @@ if __name__ == '__main__':
     # Output file with site condition
     if args.site:
         csv_list = [csv for csv in csv_list if os.path.basename(csv).startswith(args.site)]
-        merge_csv = f'/home/s1949330/data/diss_data/pred_vars/input_merge/All_{args.site}_EXTRACT_MERGE.csv'
+        merge_csv = f'/home/s1949330/scratch/diss_data/pred_vars/input_merge/All_{args.site}_EXTRACT_MERGE.csv'
     else:
-        merge_csv = f'/home/s1949330/data/diss_data/pred_vars/input_merge/All_EXTRACT_MERGE.csv'
+        merge_csv = f'/home/s1949330/scratch/diss_data/pred_vars/input_merge/All_EXTRACT_MERGE.csv'
     
     # Align and export combined model input data
     combine(csv_list, fixed_columns, merge_csv)
