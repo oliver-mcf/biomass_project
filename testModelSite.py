@@ -27,7 +27,7 @@ def spatial_cv(train_filename, test_filename, label, trees, folder, geo):
     variable_importance(folder, label, x_train.columns)
     # Save statistics to csv
     stats_df = pd.DataFrame(stats_list)
-    stats_df.to_csv(f'/home/s1949330/Documents/scratch/diss_data/model/{folder}/{label}_STATS.csv', index = False)
+    stats_df.to_csv(f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_STATS.csv', index = False)
 
 
 
@@ -47,11 +47,11 @@ if __name__ == '__main__':
 
     # Define train and test site filenames
     if args.geo:
-        train_site = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_{args.trainSite}_EXTRACT_FINAL_{args.geo}.csv'
-        test_site = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_{args.testSite}_EXTRACT_FINAL_{args.geo}.csv'
+        train_site = f'/home/s1949330/scratch/diss_data/pred_vars/input_final/All_{args.trainSite}_EXTRACT_FINAL_{args.geo}.csv'
+        test_site = f'/home/s1949330/scratch/diss_data/pred_vars/input_final/All_{args.testSite}_EXTRACT_FINAL_{args.geo}.csv'
     else:
-        train_site = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_{args.trainSite}_EXTRACT_FINAL.csv'
-        test_site = f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_final/All_{args.testSite}_EXTRACT_FINAL.csv'
+        train_site = f'/home/s1949330/scratch/diss_data/pred_vars/input_final/All_{args.trainSite}_EXTRACT_FINAL.csv'
+        test_site = f'/home/s1949330/scratch/diss_data/pred_vars/input_final/All_{args.testSite}_EXTRACT_FINAL.csv'
 
     # Perform spatial cross validation
     spatial_cv(train_site, test_site, args.label, args.trees, args.folder, args.geo)
