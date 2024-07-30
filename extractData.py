@@ -111,7 +111,7 @@ def export(array, labels, site, year):
     df_sorted = df.sort_values(by = 'GEDI_AGB').reset_index(drop = True)
     print(df_sorted.head())
     print(df_sorted.shape)
-    output = f'/home/s1949330/data/diss_data/pred_vars/input_init/{site}_{year}_INPUT_DATA.csv'
+    output = f'/home/s1949330/scratch/diss_data/pred_vars/input_init/{site}_{year}_INPUT_DATA.csv'
     df_sorted.to_csv(output, index = False)
     print(f"Successful export: {output}\n")
 
@@ -130,13 +130,13 @@ if __name__ == '__main__':
         print(f'Extracting data in: 20{year}')
 
         # Read GEDI data
-        input_var = f'/home/s1949330/data/diss_data/gedi/{args.site}/{year}_GEDI_AGB.tif'
+        input_var = f'/home/s1949330/scratch/diss_data/gedi/{args.site}/{year}_GEDI_AGB.tif'
         gedi = GeoTiff(input_var)
 
         # Read predictor variables
-        cover_var = glob(f'/home/s1949330/data/diss_data/gedi/{args.site}/{year}_GEDI_COVER.tif')
-        vars = glob(f'/home/s1949330/data/diss_data/pred_vars/{args.site}/{year}_*.tif')
-        srtm_vars = glob(f'/home/s1949330/data/diss_data/pred_vars/{args.site}/SRTM_*.tif')
+        cover_var = glob(f'/home/s1949330/scratch/diss_data/gedi/{args.site}/{year}_GEDI_COVER.tif')
+        vars = glob(f'/home/s1949330/scratch/diss_data/pred_vars/{args.site}/{year}_*.tif')
+        srtm_vars = glob(f'/home/s1949330/scratch/diss_data/pred_vars/{args.site}/SRTM_*.tif')
         pred_vars = sorted(cover_var + vars + srtm_vars)
 
         # Reproject all variables
