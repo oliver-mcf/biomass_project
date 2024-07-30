@@ -89,7 +89,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Identify filtered input data
-    csv_list = glob(f'/home/s1949330/Documents/scratch/diss_data/pred_vars/input_init/*.csv')
+    csv_list = glob(f'/home/s1949330/data/diss_data/pred_vars/input_init/*.csv')
     
     # Define variable names
     fixed_columns = ['GEDI_X', 'GEDI_Y', 'GEDI_AGB', 'GEDI_COVER',

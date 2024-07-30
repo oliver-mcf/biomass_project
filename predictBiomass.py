@@ -1,5 +1,5 @@
 
-# Predict Biomass with Model
+# Predict Biomass with RF Model
 
 # Libraries ########################################################################################################
 from libraries import *
