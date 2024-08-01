@@ -72,7 +72,7 @@ def store_predictions(y_test, y_pred, fold, label, folder):
     # Initialise dataframe
     df = pd.DataFrame({'Observed': y_test, 'Predicted': y_pred    })
     # Export as csv
-    df.to_csv(f'/home/s1949330/scratch/diss_data/model/{folder}/{label}__PRED_TEST_FOLD{fold + 1}.csv', index = False)
+    df.to_csv(f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_PRED_TEST_FOLD{fold + 1}.csv', index = False)
 
 def test_model(x_test, y_test, folder, label, fold = None):
     '''Test Model with Withheld Subset of Available Training Data'''

@@ -21,10 +21,11 @@ def spatial_cv(train_filename, test_filename, label, trees, folder, geo):
     stats_dict['Fold'] = 1
     stats_list.append(stats_dict)
     # Visualise model performance
-    model_scatter(y_test, y_pred, folder, label, model = 0, geo = geo)
-    model_hist(y_test, y_pred, folder, label, model = 0, geo = geo)
+    #model_scatter(y_test, y_pred, folder, label, model = 0, geo = geo)
+    #model_hist(y_test, y_pred, folder, label, model = 0, geo = geo)
     # Store variable importances
     variable_importance(folder, label, x_train.columns)
+    store_predictions(y_test, y_pred, fold = 0, label = label, folder = folder)
     # Save statistics to csv
     stats_df = pd.DataFrame(stats_list)
     stats_df.to_csv(f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_STATS.csv', index = False)
