@@ -59,7 +59,7 @@ def train_model(x_train, y_train, label, trees, folder, fold = None):
     '''Train Model with Subset of Available Training Data'''
     # Set random forest parameters
     print('Running Random Forest Algorithm ...')
-    rf = RandomForestRegressor(n_estimators = trees, random_state = random.seed())
+    rf = RandomForestRegressor(n_estimators = trees, random_state = 0)
     rf.fit(x_train, y_train)
     # Save trained model
     model_filename = f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_RF_MODEL.joblib'
@@ -72,7 +72,7 @@ def store_predictions(y_test, y_pred, fold, label, folder):
     # Initialise dataframe
     df = pd.DataFrame({'Observed': y_test, 'Predicted': y_pred    })
     # Export as csv
-    df.to_csv(f'/home/s1949330/scratch/mdiss_data/model/{folder}/{label}_FOLD{fold + 1}_PRED-TEST.csv', index = False)
+    df.to_csv(f'/home/s1949330/scratch/diss_data/model/{folder}/{label}__PRED_TEST_FOLD{fold + 1}.csv', index = False)
 
 def test_model(x_test, y_test, folder, label, fold = None):
     '''Test Model with Withheld Subset of Available Training Data'''
