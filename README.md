@@ -8,11 +8,41 @@ The aim of my study was to assess the predictive performance of extrapolated GED
 
 ## Contents
 - [Repository Structure](#Repository-Structure)
-- [User Instructions](#User-Instructions)
+- [Script Functionality](#Script-Functionality)
 - [Outputs](#Outputs)
 
 ## Repository Structure
 
-- **`gee/`**: JavaScript scripts to retrieve and pre-process datasets in Google Earth Engine.
-- **`main/`**: Python and R scripts used for each stage of processing and computing. 
-- **`vis/`**: R scripts used primarily for visualising outputs of the main scripts.
+**`gee/`**: JavaScript scripts to pre-process datasets in Google Earth Engine.
+
+- `siteSeasonality.js`:
+- `gediBiomass.js`:
+- `landsatReflectance.js`:
+- `landsatNDVI_median.js`:
+- `landsatNDVI_gradient.js`:
+- `landsatNDVI_precip.js`:
+- `sentinelCBackscatter.js`:
+- `palsarLBackscatter.js`:
+- `srtmTopography.js`:
+  
+**`main/`**: Python and R scripts used for main processing and computing. 
+
+- `gediSeasonality.R`:
+- `libraries.py`:
+- `extractData.py`:
+- `alignData.py`:
+- `assessData.py`:
+- `filterFeatures.py`:
+- `testModelTrees.py`:
+- `trainModel.py`:
+- `testModelSite.py`:
+- `predictBiomass.py`:
+- `validateBiomass.py`:
+
+**`vis/`**: Python and R scripts used primarily for visualising outputs of the main scripts.
+
+- `siteFigures.py`:
+- `visualPerformance.R`:
+- `visualValidation.R`:
+
+
