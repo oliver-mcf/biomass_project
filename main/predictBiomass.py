@@ -33,8 +33,9 @@ def prepare_vars(pred_vars, year, site):
     # Set common dimensions for variables
     one_var = f'/home/s1949330/scratch/diss_data/pred_vars/{site}/{year}_HV_Median.tif'
     ref_var = GeoTiff(one_var)
+    print(ref_var.nX, ref_var.nY)
     if site == 'MGR':
-        common_nX, common_nY = ref_var.nX, ref_var.nY
+        common_nX, common_nY = (ref_var.nX - 2), ref_var.nY
     elif site == 'TKW':
         common_nX, common_nY = ref_var.nX, (ref_var.nY - 2)
     print(f'Common Variable Dimensions: {common_nX} x {common_nY}') 
