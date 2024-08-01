@@ -13,9 +13,6 @@ The aim of my study was to assess the predictive performance of extrapolated GED
 
 ## Repository Structure
 
-**gee/**
-- 
-
-**main/**
-
-**vis/**
+- **`gee/`**: JavaScript scripts originally written in Google Earth Engine (GEE) to retrieve geospatial datasets and perform initial processing steps.
+- **`main/`**: Python and R scripts used for each stage of processing and computing. 
+- **`vis/`**: R scripts used primarily for visualising outputs of the main scripts.
