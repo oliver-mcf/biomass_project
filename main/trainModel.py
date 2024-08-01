@@ -42,39 +42,42 @@ def isolate_data(filename, label, filter = False):
 def save_splits(x_train, y_train, x_test, y_test, coords, args, fold = None):
     '''Save Training and Testing Subsets'''
     # Isolate subsets
-    training_data = pd.concat([coords, pd.DataFrame(x_train), pd.DataFrame({'y_train': y_train})], axis = 1).dropna(subset = ['y_train'])
-    testing_data = pd.concat([coords, pd.DataFrame(x_test), pd.DataFrame({'y_test': y_test})], axis = 1).dropna(subset = ['y_test'])
+    train_data = pd.concat([coords, pd.DataFrame(x_train), pd.DataFrame({'y_train': y_train})], axis = 1).dropna(subset = ['y_train'])
+    test_data = pd.concat([coords, pd.DataFrame(x_test), pd.DataFrame({'y_test': y_test})], axis = 1).dropna(subset = ['y_test'])
     # Consider site-specific condition
-    training_data_filename = f'/home/s1949330/scratch/diss_data/TEST_{args.label}_MODEL_TRAINING.csv'
-    testing_data_filename = f'/home/s1949330/scratch/diss_data/TEST_{args.label}_MODEL_TESTING.csv'
-    #training_data_filename = f'/home/s1949330/scratch/diss_data/model/{args.folder}/{args.label}_MODEL_TRAINING.csv'
-    #testing_data_filename = f'/home/s1949330/scratch/diss_data/model/{args.folder}/{args.label}_MODEL_TESTING.csv'
+    train_filename = f'/home/s1949330/scratch/diss_data/model/{args.folder}/{args.label}_MODEL_TRAINING.csv'
+    test_filename = f'/home/s1949330/scratch/diss_data/model/{args.folder}/{args.label}_MODEL_TESTING.csv'
     # Consider iterative model training and testing
     if fold is not None:
-        training_data_filename = training_data_filename.replace('.csv', f'_FOLD{fold + 1}.csv')
-        testing_data_filename = testing_data_filename.replace('.csv', f'_FOLD{fold + 1}.csv')
+        train_filename = train_filename.replace('.csv', f'_FOLD{fold + 1}.csv')
+        test_filename = test_filename.replace('.csv', f'_FOLD{fold + 1}.csv')
     # Write splits to csv
-    training_data.to_csv(training_data_filename, index = False)
-    testing_data.to_csv(testing_data_filename, index = False)
+    train_data.to_csv(train_filename, index = False)
+    test_data.to_csv(test_filename, index = False)
 
 def train_model(x_train, y_train, label, trees, folder, fold = None):
     '''Train Model with Subset of Available Training Data'''
-    print('Running Random Forest Algorithm ...')
     # Set random forest parameters
+    print('Running Random Forest Algorithm ...')
     rf = RandomForestRegressor(n_estimators = trees, random_state = random.seed())
     rf.fit(x_train, y_train)
     # Save trained model
-    model_filename = f'/home/s1949330/scratch/diss_data/TEST_{label}_RF_MODEL.joblib'
-    #model_filename = f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_RF_MODEL.joblib'
+    model_filename = f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_RF_MODEL.joblib'
     if fold is not None:
         model_filename = model_filename.replace('.joblib', f'_FOLD{fold + 1}.joblib')
     joblib.dump(rf, model_filename)
 
+def store_predictions(y_test, y_pred, fold, label, folder):
+    '''Store Observed and Predicted Data'''
+    # Initialise dataframe
+    df = pd.DataFrame({'Observed': y_test, 'Predicted': y_pred    })
+    # Export as csv
+    df.to_csv(f'/home/s1949330/scratch/mdiss_data/model/{folder}/{label}_FOLD{fold + 1}_PRED-TEST.csv', index = False)
+
 def test_model(x_test, y_test, folder, label, fold = None):
     '''Test Model with Withheld Subset of Available Training Data'''
     # Read model
-    model_filename = f'/home/s1949330/scratch/diss_data/TEST_{label}_RF_MODEL.joblib'
-    #model_filename = f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_RF_MODEL.joblib'
+    model_filename = f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_RF_MODEL.joblib'
     if fold is not None:
         model_filename = model_filename.replace('.joblib', f'_FOLD{fold + 1}.joblib')
     print(f"Loading: {os.path.basename(model_filename)}")
@@ -104,16 +107,14 @@ def test_model(x_test, y_test, folder, label, fold = None):
 def variable_importance(folder, label, var_names, fold = None):
     '''Save Predictor Variable Importance in Model'''
     # Read model
-    model_filename = f'/home/s1949330/scratch/diss_data/TEST_{label}_RF_MODEL.joblib'
-    #model_filename = f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_RF_MODEL.joblib'
+    model_filename = f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_RF_MODEL.joblib'
     if fold is not None:
         model_filename = model_filename.replace('.joblib', f'_FOLD{fold + 1}.joblib')
     rf = joblib.load(model_filename)
     importances = rf.feature_importances_
     sorted_idx = np.argsort(importances)[::-1]
     # Write variable importances to csv
-    output_filename = f'/home/s1949330/scratch/diss_data/TEST_{label}_VARIABLE_IMPORTANCE.csv'
-    #output_filename = f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_VARIABLE_IMPORTANCE.csv'
+    output_filename = f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_VARIABLE_IMPORTANCE.csv'
     if fold is not None:
         output_filename = output_filename.replace('.csv', f'_FOLD{fold + 1}.csv')
     with open(output_filename, mode = 'w', newline = '') as file:
@@ -146,13 +147,13 @@ def model_scatter(y_test, y_pred, folder, label, model, geo):
     # Plot linear line of best fit
     slope, intercept = np.polyfit(y_test, y_pred, 1)
     best_fit_linear = slope * np.array(y_test) + intercept
-    ax.plot(y_test, best_fit_linear, ls = 'solid', color = 'red', label = 'Linear')
+    ax.plot(y_test, best_fit_linear, ls = 'dotted', color = 'red', label = 'Linear')
     # Plot non-linear line of best fit
     x_range = np.linspace(1, 120, 500)
     coeffs_quadratic = np.polyfit(y_test, y_pred, 2)
     polynomial_quadratic = np.poly1d(coeffs_quadratic)
     best_fit_quadratic = polynomial_quadratic(x_range)
-    ax.plot(x_range, best_fit_quadratic, ls = 'dashed', color = 'midnightblue', label = 'Non-Linear')
+    ax.plot(x_range, best_fit_quadratic, ls = 'dotted', color = 'midnightblue', label = 'Non-Linear')
     ax.set_xlim([0, upper])
     ax.set_ylim([0, upper])
     ax.set_xticks(np.arange(0, upper + step, step))
@@ -160,8 +161,7 @@ def model_scatter(y_test, y_pred, folder, label, model, geo):
     ax.set_xlabel('Observed AGB (Mg/ha)')
     ax.set_ylabel('Predicted AGB (Mg/ha)')
     ax.set_title(f'{label} Model - Observed vs Predicted')
-    fig_name = f'/home/s1949330/scratch/diss_data/TEST_{label}_MODEL_SCATTER_FOLD{model + 1}.png'
-    #fig_name = f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_MODEL_SCATTER_FOLD{model + 1}.png'
+    fig_name = f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_MODEL_SCATTER_FOLD{model + 1}.png'
     plt.savefig(fig_name, dpi = 300)
     plt.close(fig)
 
@@ -193,13 +193,13 @@ def model_hist(y_test, y_pred, folder, label, model, geo):
     # Plot linear line of best fit
     slope, intercept = np.polyfit(y_test, y_pred, 1)
     best_fit_linear = slope * np.array(y_test) + intercept
-    ax.plot(y_test, best_fit_linear, ls = 'solid', color = 'red', label = 'Linear')
+    ax.plot(y_test, best_fit_linear, ls = 'dotted', color = 'red', label = 'Linear')
     # Plot non-linear line of best fit
     x_range = np.linspace(1, 120, 500)
     coeffs_quadratic = np.polyfit(y_test, y_pred, 2)
     polynomial_quadratic = np.poly1d(coeffs_quadratic)
     best_fit_quadratic = polynomial_quadratic(x_range)
-    ax.plot(x_range, best_fit_quadratic, ls = 'dashed', color = 'midnightblue', label = 'Non-Linear')
+    ax.plot(x_range, best_fit_quadratic, ls = 'dotted', color = 'midnightblue', label = 'Non-Linear')
     ax.set_xlim([0, upper])
     ax.set_ylim([0, upper])
     ax.set_xticks(np.arange(0, upper + step, step))
@@ -207,8 +207,7 @@ def model_hist(y_test, y_pred, folder, label, model, geo):
     ax.set_xlabel('Observed AGB (Mg/ha)')
     ax.set_ylabel('Predicted AGB (Mg/ha)')
     ax.set_title(f'{label} Model - Observed vs Predicted')
-    fig_name = f'/home/s1949330/scratch/diss_data/TEST_{label}_MODEL_HIST_FOLD{model + 1}.png'
-    #fig_name = f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_MODEL_HIST_FOLD{model + 1}.png'
+    fig_name = f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_MODEL_HIST_FOLD{model + 1}.png'
     plt.savefig(fig_name, dpi = 300)
     plt.close(fig)
 
@@ -216,12 +215,7 @@ def cross_validation(x, y, sample, kfolds, label, trees, folder, geo):
     '''Train Model with K-Fold Cross-Validation'''
     # Configure k-fold cross validation
     kf = KFold(n_splits = kfolds, shuffle = True, random_state = random.seed())
-    stats_list = []
-    if sample:
-        sample_indices = random.sample(range(len(x)), k = int(0.05 * len(x)))
-        x = x.iloc[sample_indices]
-        y = y.iloc[sample_indices]
-        print('Training Data Sample Size: {:,}'.format(len(x)))
+    stats = []
     # Perform cross validation
     for fold, (train_index, test_index) in enumerate(kf.split(x)):
         print(f'Fold {fold + 1}/{kfolds}')
@@ -232,19 +226,19 @@ def cross_validation(x, y, sample, kfolds, label, trees, folder, geo):
         # Test model
         y_pred, stats_dict = test_model(x_test, y_test, folder, label, fold)
         stats_dict['Fold'] = fold + 1
-        stats_list.append(stats_dict)
+        stats.append(stats_dict)
         # Save splits
         save_splits(x_train, y_train, x_test, y_test, x.index.to_series(), args, fold)
         # Visualise model performance
-        model_scatter(y_test, y_pred, folder, label, model = fold, geo = geo)
-        model_hist(y_test, y_pred, folder, label, model = fold, geo = geo)
+        #model_scatter(y_test, y_pred, folder, label, model = fold, geo = geo)
+        #model_hist(y_test, y_pred, folder, label, model = fold, geo = geo)
         # Store variable importances
         variable_importance(folder, label, x.columns, fold)
+        store_predictions(y_test, y_pred, fold, label, folder)
         fold += 1
     # Save statistics to csv
-    stats_df = pd.DataFrame(stats_list)
-    stats_df.to_csv(f'/home/s1949330/scratch/diss_data/TEST_{label}_KFOLD_STATS.csv', index = False)
-    #stats_df.to_csv(f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_KFOLD_STATS.csv', index = False)
+    stats_df = pd.DataFrame(stats)
+    stats_df.to_csv(f'/home/s1949330/scratch/diss_data/model/{folder}/{label}_KFOLD_STATS.csv', index = False)
 
 
 # Code #############################################################################################################
@@ -270,5 +264,4 @@ if __name__ == '__main__':
 
     # Perform k-fold cross validation for model training
     cross_validation(x, y, args.sample, args.kfolds, args.label, args.trees, args.folder, args.geo)
-
 
