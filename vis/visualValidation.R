@@ -65,8 +65,8 @@ print(box)
 print(scatter)
 
 # Save plots as figures
-ggsave(plot = scatter, filename = paste0("/home/s1949330/data/gedi_field_AGB_scatter.png"), dpi = 300, width = 6, height = 5)
-ggsave(plot = bar, filename = paste0("/home/s1949330/data/gedi_site_AGB_estimates.png"), dpi = 300, width = 6, height = 4)
-ggsave(plot = box, filename = paste0("/home/s1949330/data/gedi_field_AGB_estimates.png"), dpi = 300, width = 6, height = 4)
+ggsave(plot = scatter, filename = paste0("/home/s1949330/scratch/diss_data/figures/part1_figures/gedi_field_AGB_scatter.png"), dpi = 300, width = 6, height = 5)
+ggsave(plot = bar, filename = paste0("/home/s1949330/scratch/diss_data/figures/part1_figures/gedi_site_AGB_estimates.png"), dpi = 300, width = 6, height = 4)
+ggsave(plot = box, filename = paste0("/home/s1949330/scratch/diss_data/figures/part2_figures/gedi_field_AGB_estimates.png"), dpi = 300, width = 6, height = 4)
 
 
