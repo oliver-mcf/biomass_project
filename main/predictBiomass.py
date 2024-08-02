@@ -6,7 +6,7 @@ from libraries import *
 
 
 # Objects & Methods ################################################################################################
-from extractData import GeoTiff, get_epsg, reproject, resample
+from extractData import GeoTiff, reproject, resample
 
 def filter_vars(site, year, geo):
     '''Filter Variables to Match Model Predictors'''
