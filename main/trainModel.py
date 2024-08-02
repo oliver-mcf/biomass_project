@@ -39,21 +39,19 @@ def isolate_data(filename, label, filter = False):
         print('Training Data Sample Size: {:,}'.format(len(x)))
         return y, x, coords
 
-def save_splits(x_train, y_train, x_test, y_test, coords, args, fold = None):
+def save_splits(y_train, y_test, train_coords, test_coords, args, fold = None):
     '''Save Training and Testing Subsets'''
-    # Isolate subsets
-    train_data = pd.concat([coords, pd.DataFrame(x_train), pd.DataFrame({'y_train': y_train})], axis = 1).dropna(subset = ['y_train'])
-    test_data = pd.concat([coords, pd.DataFrame(x_test), pd.DataFrame({'y_test': y_test})], axis = 1).dropna(subset = ['y_test'])
-    # Consider site-specific condition
-    train_filename = f'/home/s1949330/scratch/diss_data/model/{args.folder}/{args.label}_MODEL_TRAINING.csv'
-    test_filename = f'/home/s1949330/scratch/diss_data/model/{args.folder}/{args.label}_MODEL_TESTING.csv'
-    # Consider iterative model training and testing
+    # Combine training and testing data with coordinates
+    train_data = pd.concat([train_coords.reset_index(drop=True), pd.DataFrame({'Train': y_train, 'Test': [None] * len(y_train)})], axis = 1)
+    test_data = pd.concat([test_coords.reset_index(drop=True), pd.DataFrame({'Train': [None] * len(y_test), 'Test': y_test})], axis = 1)
+    combined_data = pd.concat([train_data, test_data], axis = 0)
+    combined_data = combined_data.rename(columns={'GEDI_X': 'X', 'GEDI_Y': 'Y'})
+    # Consider site specific condition
+    combined_filename = f'/home/s1949330/scratch/diss_data/model/{args.folder}/{args.label}_MODEL_SPLITS.csv'
     if fold is not None:
-        train_filename = train_filename.replace('.csv', f'_FOLD{fold + 1}.csv')
-        test_filename = test_filename.replace('.csv', f'_FOLD{fold + 1}.csv')
-    # Write splits to csv
-    train_data.to_csv(train_filename, index = False)
-    test_data.to_csv(test_filename, index = False)
+        combined_filename = combined_filename.replace('.csv', f'_FOLD{fold + 1}.csv')
+    # Write data to csv
+    combined_data[['X', 'Y', 'Train', 'Test']].to_csv(combined_filename, index = False)
 
 def train_model(x_train, y_train, label, trees, folder, fold = None):
     '''Train Model with Subset of Available Training Data'''
@@ -211,7 +209,7 @@ def model_hist(y_test, y_pred, folder, label, model, geo):
     plt.savefig(fig_name, dpi = 300)
     plt.close(fig)
 
-def cross_validation(x, y, sample, kfolds, label, trees, folder, geo):
+def cross_validation(x, y, coords, kfolds, label, trees, folder, geo):
     '''Train Model with K-Fold Cross-Validation'''
     # Configure k-fold cross validation
     kf = KFold(n_splits = kfolds, shuffle = True, random_state = random.seed())
@@ -221,6 +219,7 @@ def cross_validation(x, y, sample, kfolds, label, trees, folder, geo):
         print(f'Fold {fold + 1}/{kfolds}')
         x_train, x_test = x.iloc[train_index], x.iloc[test_index]
         y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+        train_coords, test_coords = coords.iloc[train_index], coords.iloc[test_index]
         # Train model
         train_model(x_train, y_train, label, trees, folder, fold)
         # Test model
@@ -228,7 +227,7 @@ def cross_validation(x, y, sample, kfolds, label, trees, folder, geo):
         stats_dict['Fold'] = fold + 1
         stats.append(stats_dict)
         # Save splits
-        save_splits(x_train, y_train, x_test, y_test, x.index.to_series(), args, fold)
+        save_splits(y_train, y_test, train_coords, test_coords, args, fold)
         # Visualise model performance
         #model_scatter(y_test, y_pred, folder, label, model = fold, geo = geo)
         #model_hist(y_test, y_pred, folder, label, model = fold, geo = geo)
@@ -250,7 +249,6 @@ if __name__ == '__main__':
     parser.add_argument('--site', type = str, help = 'Condition to train and test model for specific site')
     parser.add_argument('--folder', required = True, help = 'Folder to save results')
     parser.add_argument('--kfolds', type = int, default = 10, help = 'Number of k-folds for cross-validation')
-    parser.add_argument('--sample', action = 'store_true', help = 'Adopt a smaller sample size of the available training data')
     parser.add_argument('--trees', type = int, default = 200, help = 'Number of trees in the random forest')
     parser.add_argument('--split', type = float, default = 0.3, help = 'Test split ratio')
     parser.add_argument('--geo', help = 'Geolocation filtering condition: PALSAR or COVER or blank')
@@ -263,5 +261,5 @@ if __name__ == '__main__':
     y, x, coords = isolate_data(input_filename, args.label)
 
     # Perform k-fold cross validation for model training
-    cross_validation(x, y, args.sample, args.kfolds, args.label, args.trees, args.folder, args.geo)
+    cross_validation(x, y, args.kfolds, args.label, args.trees, args.folder, args.geo)
 
