@@ -129,7 +129,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Initialise years 
-    year_list = ['17', '18', '19']
+    year_list = ['20', '21', '22', '23']
     for year in year_list:
         print(f'Predicting Biomass for 20{year}...')
 
