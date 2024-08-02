@@ -35,7 +35,7 @@ def prepare_vars(pred_vars, year, site):
     ref_var = GeoTiff(one_var)
     print(ref_var.nX, ref_var.nY)
     if site == 'MGR':
-        common_nX, common_nY = (ref_var.nX - 2), ref_var.nY
+        common_nX, common_nY = (ref_var.nX - 2), (ref_var.nY - 2)
     elif site == 'TKW':
         common_nX, common_nY = (ref_var.nX - 2), (ref_var.nY - 2)
     print(f'Common Variable Dimensions: {common_nX} x {common_nY}') 
