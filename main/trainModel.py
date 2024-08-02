@@ -261,5 +261,5 @@ if __name__ == '__main__':
     y, x, coords = isolate_data(input_filename, args.label)
 
     # Perform k-fold cross validation for model training
-    cross_validation(x, y, args.kfolds, args.label, args.trees, args.folder, args.geo)
+    cross_validation(x, y, coords, args.kfolds, args.label, args.trees, args.folder, args.geo)
 
