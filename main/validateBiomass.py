@@ -61,8 +61,8 @@ def validation_stats(field, gedi, site, year):
     valid_stats = []
     valid_stats.append(stats_dict)
     stats_df = pd.DataFrame(valid_stats)
-    pprint(stats_df)
-    stats_df.to_csv(f'/home/s1949330/scratch/diss_data/model/yes_geo/All/predict/validate/{site}_{year}_VALIDATION_STATS.csv', index = False)
+    #pprint(stats_df)
+    stats_df.to_csv(f'/home/s1949330/scratch/diss_data/model/All/predict/validate/{site}_{year}_VALIDATION_STATS.csv', index = False)
 
 def validation_plot(field, gedi, site, year):
     '''Plot Scatter of Observed and Predicted Values'''
@@ -82,7 +82,7 @@ def validation_plot(field, gedi, site, year):
     ax.set_xlabel('Field AGB Estimates (Mg/ha)')
     ax.set_ylabel('Extrapolated GEDI AGB Estimates (Mg/ha)')
     ax.set_title(f'Model Validation')
-    fig_name = f'/home/s1949330/scratch/diss_data/model/yes_geo/All/predict/validate/{site}_{year}_VALIDATION_PLOT.png'
+    fig_name = f'/home/s1949330/scratch/diss_data/model/All/predict/validate/{site}_{year}_VALIDATION_PLOT.png'
     plt.savefig(fig_name, dpi = 300)
     plt.close(fig)
 
@@ -98,11 +98,11 @@ if __name__ == '__main__':
         for year in year_list:
             
             # Read field AGB estimates
-            csv_file = '/home/s1949330/data/diss_data/seosaw/seosaw_agb.csv'
+            csv_file = '/home/s1949330/scratch/diss_data/seosaw/SEOSAW_AGB.csv'
             field_df = read_plots(csv_file, site, year)
 
             # Read GEDI AGB estimates
-            pred = f'/home/s1949330/scratch/diss_data/model/yes_geo/All/predict/{site}_{year}_PREDICT_AGB_COVER.tif'
+            pred = f'/home/s1949330/scratch/diss_data/model/All/predict/{site}_{year}_PREDICT_AGB_COVER.tif'
             gedi_obj = GeoTiff(pred)
 
             # Isolate GEDI AGB estimates in plots
@@ -127,7 +127,7 @@ if __name__ == '__main__':
 
     # Save combined data to CSV
     pprint(validation)
-    validation.to_csv('/home/s1949330/scratch/diss_data/model/yes_geo/All/predict/validate/BOTH_ALL_VALIDATION.csv', index = False)
+    validation.to_csv('/home/s1949330/scratch/diss_data/model/All/predict/validate/BOTH_ALL_VALIDATION.csv', index = False)
 
     # Calculate statistics for all validation data
     all_gedi = validation['GEDI_AGB']
@@ -143,4 +143,6 @@ if __name__ == '__main__':
         all_gedi = filtered_df['GEDI_AGB']
         validation_stats(all_field, all_gedi, abb, 'ALL')
         validation_plot(all_field, all_gedi, abb, 'ALL')
+
+    print("IN-SITU VALIDATION COMPLETE")
     
