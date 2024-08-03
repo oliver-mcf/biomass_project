@@ -6,6 +6,11 @@ This library of code was developed for my dissertation, titled: "**In-Situ Valid
 
 The aim of my study was to assess the predictive performance of extrapolated GEDI Aboveground Biomass Density (AGBD) estimates across space and time using in-situ field AGBD estimates for validation in two miombo landscapes in Southern Africa, see Figure 1. For further detail, see `MSc_Dissertation.pdf`.
 
+<p align="center" style="margin-top: 50px;">
+  <img src="vis/sites.png" width="600">
+</p>
+
+
 ## Contents
 - [Repository Structure](#Repository-Structure)
 - [Script Functionality](#Script-Functionality)
