@@ -4,7 +4,7 @@
 
 This library of code was developed for my dissertation, titled: "**In-Situ Validation Reveals Poor Performance of Extrapolated GEDI Aboveground Biomass Density Across Miombo Landscapes**". The dissertation contributed towards my MSc Earth Observation and Geoinformation Management at the University of Edinburgh.
 
-The aim of my study was to assess the predictive performance of extrapolated GEDI Aboveground Biomass Density (AGBD) estimates across space and time using in-situ field AGBD estimates for validation in the miombo region of Southern Africa. For further detail, see `MSc_Dissertation.pdf`.
+The aim of my study was to assess the predictive performance of extrapolated GEDI Aboveground Biomass Density (AGBD) estimates across space and time using in-situ field AGBD estimates for validation in two miombo landscapes in Southern Africa, see Figure 1. For further detail, see `MSc_Dissertation.pdf`.
 
 ## Contents
 - [Repository Structure](#Repository-Structure)
@@ -47,7 +47,7 @@ The aim of my study was to assess the predictive performance of extrapolated GED
 
 ## Script Functionality
 
-Each of the main scripts were developed to address three research questions:
+All `main/` and `vis/` were developed to address one or more of the following research questions:
 1. How consistent is predictive performance when different EO predictor variables are used to extrapolate GEDI AGBD estimates across both sites?
 2. How consistent is predictive performance of extrapolated GEDI AGBD estimates with spatial (site) cross validation?
 3. How consistent is predictive performance of extrapolated GEDI AGBD estimates when validated with in-situ field AGBD estimates across both sites?
