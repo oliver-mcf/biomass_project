@@ -53,46 +53,97 @@ Each of the main scripts were developed to address three research questions:
 2. How consistent is predictive performance of extrapolated GEDI AGBD estimates with spatial (site) cross validation?
 3. How consistent is predictive performance of extrapolated GEDI AGBD estimates when validated with in-situ field AGBD estimates across both sites?
 
-To produce model-ready calibration data, 5 scripts were run: `gediSeasonality.R`, `extractData.py`, `alignData.py`, `filterFeatures.py`, and `assessData.py`. The following code segment illustrates the customisation functionality of each python script as to prepare for directly addressing each research question.
+
+### Preparation
+
+**gediSeasonality.R**
 
     .../src/main/ Rscript gediSeasonality.R
-
+    
     >>> Monthly aggregated GEDI AGBD estimates for each austral year (2019-2023)
     >>> Temporal Auto-Correlation Function (ACF) of GEDI AGBD estimates
     >>> Auto-Regressive (AR) Model of GEDI AGBD estimates
 
- 
+
+**extractData.py**
+
     .../src/main/ python extractData.py --site TKW
                                         --site MGR
-
+    
     >>> GEDI AGBD estimates and intersecting predictor variable data in .csv format for each combination of site and year.
 
+
+**alignData.py**
 
     .../src/main/ python alignData.py --geo COVER
                                       --geo COVER --site TKW
                                       --geo COVER --site MGR
-
+    
     >>> GEDI AGBD estimates and intersecting predictor variable data in .csv format for each site and overall, and for geolocation condition applied
     >>> Linear regression statistics in .csv format for all filtered predictor variables and GEDI AGBD estimates
 
+**assessData.py**
 
     .../src/main/ python assessData.py --count --file ".../All_EXTRACT_MERGE.csv"
                                        --count --file ".../All_EXTRACT_MERGE_COVER.csv"
                                        --regress --file ".../All_EXTRACT_MERGE.csv"
                                        --regress --geo COVER --file ".../All_EXTRACT_MERGE_COVER"
-
+    
     >>> Count of initial and filtered GEDI AGBD estimates for each site and year
     >>> Linear regression statistics for GEDI AGBD and predictor variables in .csv format
-    
+
+**filterFeatures.py**
 
     .../src/main/ python filterFeatures.py --filter --coef 0.9
                                            --filter --coef 0.9 --geo COVER
                                            --reduce
                                            --reduce --geo COVER
-
+    
     >>> Final .csv files with filtered and reduced GEDI AGBD estimates for both and each site
     >>> Correlation coefficient matrix for all and geolocation filtered predictor variables in .png format
 
+
+### Research Question 1
+
+**testModelTrees.py**
+
+    .../src/main/ python testModelTrees.py --label All
+    
+    >>> Performance statistics from 5 model iterations with 100-500 trees/estimtors    
+
+**trainModel.py**
+
+    .../src/main/ python trainModel.py --geo COVER --label All --folder All
+                                                   --label Landsat --folder Landsat
+                                                   --label Sentinel --folder Sentinel
+                                                   --label Palsar --folder Palsar
+    
+    >>> Train-Test subsets in .csv format
+    >>> Pred-Test subsets in .csv format
+    >>> Random Forest Model in .joblib format
+    >>> Variable Importances in .csv format
+    >>> Combined list of performance statistics in .csv format
+
+
+### Research Question 2
+
+**trainModel.py**
+
+    .../src/main/ python trainModel.py --geo COVER --label All --site TKW --folder TKW
+                                                               --site MGR --folder MGR
+    
+    >>> Train-Test subsets in .csv format
+    >>> Pred-Test subsets in .csv format
+    >>> Random Forest Model in .joblib format
+    >>> Variable Importances in .csv format
+    >>> Combined list of performance statistics in .csv format
+
+**testModelSite.py**
+
+    .../src/main/ python testModelSite.py --geo COVER --label All --trainSite TKW --testSite MGR --folder TKW-MGR
+                                                                  --trainSite MGR --testSite TKW --folder MGR-TKW
+                                         
+    >>> 
 
 
 
