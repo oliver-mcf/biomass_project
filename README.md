@@ -53,7 +53,20 @@ Each of the main scripts were developed to address three research questions:
 2. How consistent is predictive performance of extrapolated GEDI AGBD estimates with spatial (site) cross validation?
 3. How consistent is predictive performance of extrapolated GEDI AGBD estimates when validated with in-situ field AGBD estimates across both sites?
 
+To produce model-ready calibration data, four scripts were run: `gediSeasonality.R`, `extractData.py`, `alignData.py`, and `assessData.py`. The `gediSeasonality.R` script was designed to run as a complete script. The following code segment illustrates the customisation functionality of each python script as to prepare for directly addressing each research question.
 
-x
+    >>> Rscript gediSeasonality.R
+    
+    >>> python extractData.py --site TKW
+                              --site MGR
+
+    >>> python alignData.py --geo COVER
+                            --geo COVER --site TKW
+                            --geo COVER --site MGR
+
+    >>> python assessData.py --count --file ".../All_EXTRACT_MERGE.csv"
+                             --count --file ".../All_EXTRACT_MERGE_COVER.csv"
+
+
 
 
