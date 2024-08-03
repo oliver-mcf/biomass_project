@@ -124,6 +124,13 @@ Each of the main scripts were developed to address three research questions:
     >>> Variable Importances in .csv format
     >>> Combined list of performance statistics in .csv format
 
+**visualPerformance.R**
+
+    .../src/main/ Rscript visualPerformance.R
+    
+    >>> Box plots of performance statistics by model group in .png format
+    >>> Scatter plot of predicted-observed values in .png format
+    >>> Two-dimensional histogram of predicted-observed values in .png format
 
 ### Research Question 2
 
@@ -143,7 +150,39 @@ Each of the main scripts were developed to address three research questions:
     .../src/main/ python testModelSite.py --geo COVER --label All --trainSite TKW --testSite MGR --folder TKW-MGR
                                                                   --trainSite MGR --testSite TKW --folder MGR-TKW
                                          
-    >>> 
+    >>> Pred-Test subsets in .csv format
+    >>> Random Forest Model in .joblib format
+    >>> Variable Importances in .csv format
+    >>> Combined list of performance statistics in .csv format
 
+**visualPerformance.R**
 
+    .../src/main/ Rscript visualPerformance.R
+    
+    >>> Scatter plot of extrapolated GEDI AGB estimates (70%) and the withheld subset (30%) in .png format
+    >>> Two-dimensional histogram of extrapolated GEDI AGB estimates (70%) and the withheld subset (30%) in .png format
 
+### Research Question 3
+
+**predictBiomass.py**
+
+    .../src/main/ python predictBiomass.py --geo COVER --folder All --model 4 --site TKW 
+                                                                              --site MGR
+    
+    >>> Map of extrapolated GEDI AGBD estimates in .png format for each site and year
+    >>> Histogram of extrapolated GEDI AGBD estimates in .png format for each site and year
+    >>> Geolocated raster of extrapolated GEDI AGBD estimates in .tif format for each site and year
+
+**validateBiomass.py**
+
+    .../src/main/ python validateBiomass.py
+    
+    >>> Scatter plots of extrapolated GEDI AGBD estimates and field AGBD estimates for each site, year, and overall in .png format
+    >>> Perforance statistics of each site and year condition in .csv format
+
+**visualValidation.R**
+
+    .../src/main/ Rscript visualValidaiton.R
+    
+    >>> Scatter plot of extrapolated GEDI AGBD estimates and field AGBD estimates in .png format
+    >>> Two-dimensional histogram of extrapolated GEDI AGBD estimates and field AGBD estimates in .png format
