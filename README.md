@@ -9,7 +9,6 @@ The aim of my study was to assess the predictive performance of extrapolated GED
 ## Contents
 - [Repository Structure](#Repository-Structure)
 - [Script Functionality](#Script-Functionality)
-- [Outputs](#Outputs)
 
 ## Repository Structure
 
