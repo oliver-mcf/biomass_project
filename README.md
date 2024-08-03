@@ -53,19 +53,45 @@ Each of the main scripts were developed to address three research questions:
 2. How consistent is predictive performance of extrapolated GEDI AGBD estimates with spatial (site) cross validation?
 3. How consistent is predictive performance of extrapolated GEDI AGBD estimates when validated with in-situ field AGBD estimates across both sites?
 
-To produce model-ready calibration data, four scripts were run: `gediSeasonality.R`, `extractData.py`, `alignData.py`, and `assessData.py`. The `gediSeasonality.R` script was designed to run as a complete script. The following code segment illustrates the customisation functionality of each python script as to prepare for directly addressing each research question.
+To produce model-ready calibration data, 5 scripts were run: `gediSeasonality.R`, `extractData.py`, `alignData.py`, `filterFeatures.py`, and `assessData.py`. The following code segment illustrates the customisation functionality of each python script as to prepare for directly addressing each research question.
 
-    >>> Rscript gediSeasonality.R
+    .../src/main/ Rscript gediSeasonality.R
+
+    >>> Monthly aggregated GEDI AGBD estimates for each austral year (2019-2023)
+    >>> Temporal Auto-Correlation Function (ACF) of GEDI AGBD estimates
+    >>> Auto-Regressive (AR) Model of GEDI AGBD estimates
+
+ 
+    .../src/main/ python extractData.py --site TKW
+                                        --site MGR
+
+    >>> GEDI AGBD estimates and intersecting predictor variable data in .csv format for each combination of site and year.
+
+
+    .../src/main/ python alignData.py --geo COVER
+                                      --geo COVER --site TKW
+                                      --geo COVER --site MGR
+
+    >>> GEDI AGBD estimates and intersecting predictor variable data in .csv format for each site and overall, and for geolocation condition applied
+    >>> Linear regression statistics in .csv format for all filtered predictor variables and GEDI AGBD estimates
+
+
+    .../src/main/ python assessData.py --count --file ".../All_EXTRACT_MERGE.csv"
+                                       --count --file ".../All_EXTRACT_MERGE_COVER.csv"
+                                       --regress --file ".../All_EXTRACT_MERGE.csv"
+                                       --regress --geo COVER --file ".../All_EXTRACT_MERGE_COVER"
+
+    >>> Count of initial and filtered GEDI AGBD estimates for each site and year
+    >>> Linear regression statistics for GEDI AGBD and predictor variables in .csv format
     
-    >>> python extractData.py --site TKW
-                              --site MGR
 
-    >>> python alignData.py --geo COVER
-                            --geo COVER --site TKW
-                            --geo COVER --site MGR
+    .../src/main/ python filterFeatures.py --filter --coef 0.9
+                                           --filter --coef 0.9 --geo COVER
+                                           --reduce
+                                           --reduce --geo COVER
 
-    >>> python assessData.py --count --file ".../All_EXTRACT_MERGE.csv"
-                             --count --file ".../All_EXTRACT_MERGE_COVER.csv"
+    >>> Final .csv files with filtered and reduced GEDI AGBD estimates for both and each site
+    >>> Correlation coefficient matrix for all and geolocation filtered predictor variables in .png format
 
 
 
