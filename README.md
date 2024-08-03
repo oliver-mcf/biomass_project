@@ -46,3 +46,14 @@ The aim of my study was to assess the predictive performance of extrapolated GED
 - `visualValidation.R`: Visualise differentiated scatter and sensitivity plots for extrapolated-field AGBD estimates.
 
 
+## Script Functionality
+
+Each of the main scripts were developed to address three research questions:
+1. How consistent is predictive performance when different EO predictor variables are used to extrapolate GEDI AGBD estimates across both sites?
+2. How consistent is predictive performance of extrapolated GEDI AGBD estimates with spatial (site) cross validation?
+3. How consistent is predictive performance of extrapolated GEDI AGBD estimates when validated with in-situ field AGBD estimates across both sites?
+
+
+x
+
+
