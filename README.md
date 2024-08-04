@@ -186,7 +186,7 @@ All `main/` and `vis/` were developed to address one or more of the following re
 
 **visualValidation.R**
 
-    .../src/main/ Rscript visualValidaiton.R
+    .../src/main/ Rscript visualValidation.R
     
     >>> Scatter plot of extrapolated GEDI AGBD estimates and field AGBD estimates in .png format
     >>> Two-dimensional histogram of extrapolated GEDI AGBD estimates and field AGBD estimates in .png format
