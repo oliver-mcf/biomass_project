@@ -2,7 +2,7 @@
 
 ## Overview
 
-This library of code was developed for my dissertation, titled: "**In-Situ Validation Reveals Poor Performance of Extrapolated GEDI Aboveground Biomass Density Across Miombo Landscapes**". The dissertation contributed towards my MSc Earth Observation and Geoinformation Management at the University of Edinburgh.
+This library of code was developed for my dissertation, titled: "**In-Situ Validation Reveals Poor Performance of Extrapolated GEDI Aboveground Biomass Estimates Across Miombo Landscapes**". The dissertation contributed towards my MSc Earth Observation and Geoinformation Management at the University of Edinburgh.
 
 The aim of my study was to assess the predictive performance of extrapolated GEDI Aboveground Biomass Density (AGBD) estimates across space and time using in-situ field AGBD estimates for validation in two miombo landscapes in Southern Africa, see Figure 1. For further detail, see `MSc_Dissertation.pdf`.
 
